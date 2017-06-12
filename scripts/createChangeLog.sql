@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS 'ChangeLog' (
+  'ID' int(11) NOT NULL AUTO_INCREMENT,
+  'InsertDate' DATE (11) NOT NULL AUTO_INCREMENT,
+  'Odject' varchar(200) NOT NULL DEFAULT '0',
+  'Code' varchar(2000) NOT NULL DEFAULT '',
+  PRIMARY KEY ('ID')
+);
+-- ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Table with abuse reports' AUTO_INCREMENT=1 ;
