@@ -32,8 +32,8 @@
                         if (!button.document){
                             button.document =
                                     APP.childFor(sysadmin_changeLog_ContentPaneDetailContainer, "sysadmin_changeLog_TablechangeLog",
-                                            TDocumentSimpleTable, {titleText:instance.label, dataURL:'/sysadmin/get_changeLog/', buttonPrint:false})
-                                            .addBeginDateBox("с","BDATE",APP.yesterday()).addEndDateBox("по","EDATE",APP.yesterday())
+                                            TDocumentSimpleTable, {titleText:instance.label, dataURL:'/sysadmin/changeLog/'+button.id, buttonPrint:false})
+//                                            .addBeginDateBox("с","BDATE",APP.yesterday()).addEndDateBox("по","EDATE",APP.yesterday())
                                             .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:40px;"})
 //                                            .addTotalSumNumberTextBox("ИТОГО кол-во:",260, "TotalQty", {style:"font-weight:bold;",inputStyle:"width:60px;"})
 //                                            .addTotalSumNumberTextBox("ИТОГО сумма:",200, "TotalSum", {style:"font-weight:bold;",inputStyle:"width:80px;",
@@ -44,7 +44,7 @@
                     };
                     button.domNode.firstChild.setAttribute("style", "width:150px;");
                     button.startup();
-                    sysadmin_changeLog_ContentPaneLeft.appendChild(button.domNode);
+                    sysadmin_changeLog_ContentPaneLeft.domNode.appendChild(button.domNode);
                     return button;
                 };
 
@@ -83,9 +83,11 @@
 //                            });
 //
 //                };
+                var showChangeLogsBtn= sysadmin_changeLog_PageContainer.addButtonTo(sysadmin_changeLog_ContentPaneLeft, "change_log","Show Change Logs");
                 sysadmin_changeLog_PageContainer.addButtonTo(sysadmin_changeLog_ContentPaneLeft, "update_db","Update Database");
 
                 //sysadmin_changeLog_PageContainer.createReportButtons();
+                showChangeLogsBtn.onClick();
                 sysadmin_changeLog_PageContainer.getChangeLogInfo();
                 sysadmin_changeLog_PageContainer.layout();
             });

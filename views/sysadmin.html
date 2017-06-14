@@ -30,12 +30,14 @@
         <div id="sysadmin_TopStateInfo">
             <div id="sysadmin_app_mode" style="display:inline;"></div>
             <div id="sysadmin_dbName" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_userName" style="display:inline;;margin-left:20px;"></div>
             <div id="sysadmin_connectToDBState" style="display:inline;margin-left:20px;"></div>
             <div id="sysadmin_dbValidateState" style="display:inline;margin-left:20px;"></div>
         </div>
         <div id="sysadmin_TopActions">
             <button id="display_startup_params">Startup params</button>
             <button id="btnChangeLog">Change Log</button>
+            <!--<button id="btnDB_admin">DB admin</button>-->
 
 
         </div>
@@ -77,7 +79,8 @@
                 functionalButtons.push(startupBtn);
                 var btnChangeLog = new ToggleButton({id:"btnChangeLog",iconClass:'dijitCheckBoxIcon'},"btnChangeLog");
                 functionalButtons.push(btnChangeLog);
-
+//                var btnDB_admin = new ToggleButton({id:"btnDB_admin",iconClass:'dijitCheckBoxIcon'},"btnDB_admin");
+//                functionalButtons.push(btnDB_admin);
 
                 var sysadmin_ContentContainer = APP.instanceForID("sysadmin_ContentContainer",
                         StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
@@ -100,7 +103,9 @@
                                         eAppMode.innerHTML = eAppMode.innerHTML + "<b>UNKNOWN!!!</b>";
                                     if (result.configuration) {
                                         document.getElementById("sysadmin_dbName").innerHTML =
-                                                "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>"
+                                                "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>";
+                                        document.getElementById("sysadmin_userName").innerHTML =
+                                                "<b>USER:<span style='color:dimgrey'>" + result.configuration.user + "</span></b>"
                                     }
                                     if (result.dbConnection) {
                                         document.getElementById("sysadmin_connectToDBState").innerHTML =
@@ -156,6 +161,10 @@
                     sysadmin_MainContainer.runSysadminContentPage(btnChangeLog, "btnChangeLog", "Change Log", false, "/sysadmin/changeLog");
                     checkButton(this);
                 };
+//                btnDB_admin.onClick=function(){
+//                    sysadmin_MainContainer.runSysadminContentPage(btnDB_admin, "btnDB_admin", "DB admin", false, "/sysadmin/DBadmin");
+//                    checkButton(this);
+//                };
                 sysadmin_MainContainer.getAppState();
 
             });

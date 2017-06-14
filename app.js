@@ -165,13 +165,103 @@ app.post("/sysadmin/startup_parameters/store_app_config_and_reconnect", function
     );
 });
 
+//app.get("/sysadmin/DBadmin", function (req, res) {
+//    log.info('URL: /sysadmin/createDB');
+//    res.sendFile(path.join(__dirname, '/views/sysadmin', 'DBadmin.html'));
+//});
+
+//app.post("/sysadmin/connect_to_mysql", function (req, res) { // console.log("req=",req);
+//    log.info('sysadmin/connect_to_mysql');
+//    var connParams={
+//        host: req.body.host,
+//        user: req.body.user,
+//        password: req.body.password
+//    };
+//    database.mySQLConnection(connParams,function(err, ok){
+//     var outData={};
+//            if (err) {
+//                outData.error=err.message;
+//                res.send(outData);
+//                return;
+//            }
+//        outData.ok=ok;
+//        res.send(outData);
+//    });
+//
+//});
+//
+//app.post("/sysadmin/create_new_DB", function (req, res) {
+//    log.info('sysadmin/create_new_DB');
+//    var newDBName= req.body.newDBName;
+//
+//    database.createNewDB(newDBName,function(err, ok){
+//        var outData={};
+//        if (err) {
+//            outData.err=err;
+//            res.send(outData);
+//            return;
+//        }
+//        outData.ok=ok;
+//        res.send(outData);
+//    });
+//
+//});
+///sysadmin/create_new_db
+
+app.post("/sysadmin/create_new_db", function (req, res) {
+    log.info('sysadmin/create_new_db');
+    var host=req.body.host;
+    var newDBName=req.body.newDatabase;
+    var newUserName=req.body.newUser;
+    var newUserPassword=req.body.newPassword;
+
+    var connParams={
+        host: host,
+        user: req.body.adminName,
+        password: req.body.adminPassword
+    };
+    var outData={};
+
+    database.mySQLAdminConnection(connParams,function(err){
+            if (err) {                  console.log("mySQLAdminConnection err=", err);
+                outData.error=err.message;
+                res.send(outData);
+                return;
+            }
+        database.createNewDB(newDBName,function(err){
+            if(err){                console.log("createNewDB err=", err);
+                outData.error=err.message;
+                res.send(outData);
+                return;
+            }
+            database.createNewUser(host,newUserName,newUserPassword, function(err){
+                if(err){                console.log("createNewUser err=", err);
+                    outData.error=err.message;
+                    res.send(outData);
+                    return;
+                }
+                database.grantUserAccess(host,newUserName,newDBName, function(err, ok){
+                    if(err){                console.log("createNewUser err=", err);
+                        outData.error=err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    outData.ok=ok;
+                    res.send(outData);
+                })
+            });
+        });
+    });
+});
+
+
 app.get("/sysadmin/changeLog", function (req, res) {
     log.info("URL: /sysadmin/changeLog");
     res.sendFile(path.join(__dirname, '/views/sysadmin', 'changeLog.html'));
 });
 
-app.get("/sysadmin/get_changeLogInfo/", function (req, res) {
-    log.info("/sysadmin/get_changeLogInfo/",req.params," ", JSON.stringify(req.query));
+app.get("/sysadmin/changeLog/change_log", function (req, res) {
+    log.info("/sysadmin/changeLog/change_log",req.params," ", JSON.stringify(req.query));
     //var initialCRID= req.params[0].replace("Sales","");
 
     var outData={};
