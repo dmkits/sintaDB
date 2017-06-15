@@ -29,8 +29,9 @@
         <div id="sysadmin_TopImg"></div>
         <div id="sysadmin_TopStateInfo">
             <div id="sysadmin_app_mode" style="display:inline;"></div>
+            <div id="sysadmin_app_port" style="display:inline; margin-left:20px;;"></div>
             <div id="sysadmin_dbName" style="display:inline;;margin-left:20px;"></div>
-            <div id="sysadmin_userName" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_ConnUserName" style="display:inline;;margin-left:20px;"></div>
             <div id="sysadmin_connectToDBState" style="display:inline;margin-left:20px;"></div>
             <div id="sysadmin_dbValidateState" style="display:inline;margin-left:20px;"></div>
         </div>
@@ -93,7 +94,13 @@
                                     if (result === undefined || result == null) result = [];
                                     sysadmin_MainContainer.mainContentData = result;
                                     var eAppMode = document.getElementById("sysadmin_app_mode");
+                                    var eAppPort = document.getElementById("sysadmin_app_port");
                                     eAppMode.innerHTML = "<b>MODE:</b>";
+                                    eAppPort.innerHTML = "<b>PORT:</b>";
+                                    if(result.port){
+                                        eAppPort.innerHTML=eAppPort.innerHTML+"<b style='color:dimgrey'>"+ result.port+"</b>";
+                                    }
+
                                     if (result.mode) {
                                         if (result.mode.toString().toLocaleLowerCase().indexOf("test") >= 0)
                                             eAppMode.innerHTML = eAppMode.innerHTML + "<b style='color:red'>" + result.mode + "</b>";
@@ -104,7 +111,7 @@
                                     if (result.configuration) {
                                         document.getElementById("sysadmin_dbName").innerHTML =
                                                 "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>";
-                                        document.getElementById("sysadmin_userName").innerHTML =
+                                        document.getElementById("sysadmin_ConnUserName").innerHTML =
                                                 "<b>USER:<span style='color:dimgrey'>" + result.configuration.user + "</span></b>"
                                     }
                                     if (result.dbConnection) {

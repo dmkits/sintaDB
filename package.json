@@ -17,6 +17,7 @@
     "iconv-lite": "^0.4.17",
     "mssql": "~3.3.0",
     "mysql": "^2.13.0",
+    "mysqldump": "^1.4.2",
     "path": "~0.12.7",
     "request": "^2.81.0",
     "socket.io": "^1.7.3",

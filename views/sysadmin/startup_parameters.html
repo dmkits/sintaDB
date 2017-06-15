@@ -42,7 +42,6 @@
                 </table>
             </td>
         </tr>
-
         <tr>
             <td height="40px"> <!--height="30px"-->
                 <button id="SA_startup_params_BtnAppLocalConfigLoad">Load settings</button>
@@ -68,6 +67,14 @@
                         </td>
                         <td>
                         <td id="drop_db_result" style="font-weight: bold; width: 400px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:75px">
+                            <button id="backup_db_btn">Backup DB</button>
+                        </td>
+                        <td>
+                        <td id="backup_db_result" style="font-weight: bold; width: 400px;">
                         </td>
                     </tr>
                 </table>
@@ -107,18 +114,37 @@
                 var sa_startup_params_appLocalConfig = document.getElementById("sa_startup_params_appLocalConfig");
                 var reloadBtn = new Button({id: "SA_startup_params_BtnAppLocalConfigLoad"}, "SA_startup_params_BtnAppLocalConfigLoad");
                 var saveAndReconnectBtn = new Button({id: "SA_startup_params_BtnAppLocalConfigSaveAndReconnect"}, "SA_startup_params_BtnAppLocalConfigSaveAndReconnect");
-                var createDBBtn= new Button({id: "create_db_btn"}, "create_db_btn"); //drop_db_btn
+                var createDBBtn= new Button({id: "create_db_btn"}, "create_db_btn");
                 createDBBtn.domNode.firstChild.setAttribute("style", "width:70px;");
                 var dropDBBtn= new Button({id: "drop_db_btn"}, "drop_db_btn");
                 dropDBBtn.domNode.firstChild.setAttribute("style", "width:70px;");
+                var backupDBBtn= new Button({id: "backup_db_btn"}, "backup_db_btn");
+                backupDBBtn.domNode.firstChild.setAttribute("style", "width:70px;");
 
               //  var infoDialog=new Dialog({});
                 var dialogTable=document.getElementById("dialog_table");
                 var adminAuthDialog = new ConfirmDialog({
+                    autofocus:false,
                     id: "myDialog",
                     content: dialogTable,
                     title: "Admin authorisation"
                 }, "myDialog");
+
+                createDBBtn.onClick=function() {
+                    adminAuthDialog.action="createDB";
+                    adminAuthDialog.show();
+                    document.getElementById("admin_password").focus();
+                };
+                dropDBBtn.onClick=function(){
+                    adminAuthDialog.action="dropDB";
+                    adminAuthDialog.show();
+                    document.getElementById("admin_password").focus();
+                };
+                backupDBBtn.onClick=function(){
+                    adminAuthDialog.action="backupDB";
+                    adminAuthDialog.show();
+                    document.getElementById("admin_password").focus();
+                };
 
 
                 sa_startup_params_PageContent.getAppConfiguration = function(){                            console.log("sa_startup_params_PageContent.getAppConfiguration");
@@ -174,7 +200,7 @@
 
                 saveAndReconnectBtn.onClick = function () {                                                             console.log("saveAndReconnectBtn.onClick");
                     var sa_startup_params_appLocalConfig = document.getElementById("sa_startup_params_appLocalConfig");
-                    sa_startup_params_appLocalConfig.innerHTML = "<div><b>Configuration saving and reconnected to database...</b></div>";
+                    sa_startup_params_appLocalConfig.innerHTML = "<div><b>Configuration saving and reconnecting to database...</b></div>";
                     var newDBConfig={
                         "host": hostInput.get('value'),
                        // "port": portInput.get('value'),
@@ -204,18 +230,12 @@
                                if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
                             });
                 };
-                createDBBtn.onClick=function() {
-                    adminAuthDialog.action="createDB";
-                    adminAuthDialog.show();
-                };
-                dropDBBtn.onClick=function(){
-                    adminAuthDialog.action="dropDB";
-                    adminAuthDialog.show();
-                };
+
 
                 adminAuthDialog.onExecute=function(){ //admin_password
                     if(adminAuthDialog.action=="createDB") createDataBase();
                     if(adminAuthDialog.action=="dropDB") dropDataBase();
+                    if(adminAuthDialog.action=="backupDB") backupDataBase();
                     adminAuthDialog.hide();
                 };
                 adminAuthDialog.onCancel=function(){
@@ -244,6 +264,7 @@
                                 }
                                 if (data.error) {
                                     document.getElementById("create_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"</b>";
+                                    sa_startup_params_PageContent.getAppConfiguration();
                                     if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
                                 } else {
                                     var successMsgStr = '';
@@ -252,22 +273,23 @@
                                     if (data.userExists) successMsgStr += data.userExists + " ";
                                     if (data.accessAdded) successMsgStr += data.accessAdded;
                                     document.getElementById("create_db_result").innerHTML = successMsgStr;
-                                    //saveAndReconnectBtn.onClick();
+                                    saveAndReconnectBtn.onClick();
                                 }
-                                saveAndReconnectBtn.onClick();
+                                //saveAndReconnectBtn.onClick();
                             });
                 }
                 function dropDataBase(){
                     document.getElementById("drop_db_result").innerHTML = "";
                     document.getElementById("create_db_result").innerHTML = "";
+                    document.getElementById("backup_db_result").innerHTML = "";
                     var DB = {};
                     DB.adminName = document.getElementById("admin_name").value;
                     DB.adminPassword = document.getElementById("admin_password").value;
                     DB.host = hostInput.get('value');
                     // "port": portInput.get('value'),
-                    DB.newDatabase = databaseInput.get('value');
-                    DB.newUser = userInput.get('value');
-                    DB.newPassword = dbPasswordInput.get('value');
+                    DB.database = databaseInput.get('value');
+                    DB.user = userInput.get('value');
+                    DB.password = dbPasswordInput.get('value');
 
                     Request.postJSONData({url: "/sysadmin/drop_db", data: DB, consoleLog: true},
                             function (success, data) {                                      console.log("data=", data);
@@ -277,12 +299,41 @@
                                 }
                                 if (data.error) {
                                     document.getElementById("drop_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"<b>";
+                                    sa_startup_params_PageContent.getAppConfiguration();
                                     if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
-
                                 } else {
                                     var successMsgStr = data.dropped;
                                     document.getElementById("drop_db_result").innerHTML = successMsgStr;
                                     saveAndReconnectBtn.onClick();
+                                }
+
+                            });
+                }
+                function backupDataBase(){
+                    document.getElementById("drop_db_result").innerHTML = "";
+                    document.getElementById("create_db_result").innerHTML = "";
+                    document.getElementById("backup_db_result").innerHTML = "";
+                    var DB = {};
+                    DB.adminName = document.getElementById("admin_name").value;
+                    DB.adminPassword = document.getElementById("admin_password").value;
+                    DB.host = hostInput.get('value');
+                    // "port": portInput.get('value'),
+                    DB.database = databaseInput.get('value');
+                    DB.user = userInput.get('value');
+                    DB.password = dbPasswordInput.get('value');
+                    Request.postJSONData({url: "/sysadmin/backup_db", data: DB, consoleLog: true},
+                            function (success, data) {                                      console.log("data=", data);
+                                document.getElementById("admin_password").value="";
+                                if (!success) {
+                                    sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
+                                }
+                                if (data.error) {
+                                    document.getElementById("backup_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"<b>";
+                                    sa_startup_params_PageContent.getAppConfiguration();
+                                    if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
+                                } else {
+                                    var successMsgStr = data.backup;
+                                    document.getElementById("backup_db_result").innerHTML = successMsgStr;
                                 }
                                 saveAndReconnectBtn.onClick();
                             });

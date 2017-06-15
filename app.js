@@ -110,22 +110,42 @@ app.get("/sysadmin", function (req, res) {
     log.info('URL: /sysadmin');
     res.sendFile(path.join(__dirname, '/views', 'sysadmin.html'));
 });
-app.get("/sysadmin/app_state", function (req, res) {
-    log.info('URL: /sysadmin/app_state');
-    var outData = {};
-    outData.mode = app_params.mode;
+//app.get("/sysadmin/app_state", function (req, res) {
+//    log.info('URL: /sysadmin/app_state');
+//    var outData = {};
+//    outData.mode = app_params.mode;
+//    outData.port=port;
+//    if (ConfigurationError) {
+//        outData.error = ConfigurationError;
+//        res.send(outData);
+//        return;
+//    }
+//    outData.configuration = database.getDBConfig();
+//    if (DBConnectError)
+//        outData.dbConnection = DBConnectError;
+//    else
+//        outData.dbConnection = 'Connected';
+//    res.send(outData);
+//});
+
+app.get("/sysadmin/app_state", function(req, res){                                     log.info("app.get /sysadmin/app_state");
+    var outData= {};
+    outData.mode= app_params.mode;
+    outData.port=port;
+    outData.connUserName=database.getDBConfig().user;
     if (ConfigurationError) {
-        outData.error = ConfigurationError;
+        outData.error= ConfigurationError;
         res.send(outData);
         return;
     }
-    outData.configuration = database.getDBConfig();
+    outData.configuration= database.getDBConfig();
     if (DBConnectError)
-        outData.dbConnection = DBConnectError;
+        outData.dbConnection= DBConnectError;
     else
-        outData.dbConnection = 'Connected';
+        outData.dbConnection='Connected';
     res.send(outData);
 });
+
 
 app.get("/sysadmin/startup_parameters", function (req, res) {
     log.info('URL: /sysadmin/startup_parameters');
@@ -291,9 +311,9 @@ app.post("/sysadmin/create_new_db", function (req, res) {
 app.post("/sysadmin/drop_db", function (req, res) {
     log.info("/sysadmin/drop_db");
     var host = req.body.host;
-    var DBName = req.body.newDatabase;
-   // var userName = req.body.newUser;
-   // var userPassword = req.body.newPassword;
+    var DBName = req.body.database;
+   // var userName = req.body.user;
+   // var userPassword = req.body.password;
 
     var connParams = {
         host: host,
@@ -331,6 +351,60 @@ app.post("/sysadmin/drop_db", function (req, res) {
         });
     });
 });
+
+app.post("/sysadmin/backup_db", function (req, res) {
+    log.info("/sysadmin/backup_db");
+    var host = req.body.host;
+    var DBName = req.body.database;
+    var adminUser=req.body.adminName;
+    var adminPassword=req.body.adminPassword;
+    // var userName = req.body.user;
+    // var userPassword = req.body.password;
+
+    var connParams = {
+        host: host,
+        user: adminUser,
+        password: adminPassword
+    };
+    var backupParam={
+        host: host,
+        user: adminUser,
+        password: adminPassword,
+        database:DBName,
+        dest:'./data.sql'
+    };
+    var outData = {};
+
+    database.mySQLAdminConnection(connParams, function (err) {
+        if (err) {                                                                      console.log("mySQLAdminConnection err=", err);
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        database.checkIfDBExists(DBName, function (err, result) {
+            if (err) {                                                                  console.log("checkIfDBExists err=", err);
+                outData.error = err.message;
+                res.send(outData);
+                return;
+            }
+            if (result.length == 0) {
+                outData.error = "Impossible to back up DB! Database " + DBName + " is not exists!";
+                res.send(outData);
+                return;
+            }
+            database.backupDB(backupParam,function(err,ok){
+                if (err) {                                                               console.log("checkIfDBExists err=", err);
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                outData.backup=ok;
+                res.send(outData);
+            })
+        });
+    });
+});
+
 
 app.get("/sysadmin/changeLog", function (req, res) {
     log.info("URL: /sysadmin/changeLog");

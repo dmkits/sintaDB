@@ -1,12 +1,13 @@
 var fs = require('fs');
 //var sql = require('mssql');
+var mysqlDump = require('mysqldump');
 var mysql      = require('mysql');
 var app = require('./app');
 var dbConfig;
 var dbConfigFilePath;
 //var conn=null;
 var connection=null;
-var connection=null;
+
 
 module.exports.getDBConfig=function(){
     return dbConfig;
@@ -146,6 +147,23 @@ module.exports.dropDB= function(DBName,callback) {
             callback(null,DBName+" dropped!");
         }
     );
+};
+
+module.exports.backupDB= function(backupParam,callback) {
+
+    mysqlDump({
+        host: backupParam.host,
+        user: backupParam.user,
+        password: backupParam.password,
+        database: backupParam.database,
+        dest:'./data.sql'
+    },function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,backupParam.database+" backup is ready!");
+        });
 };
 
 module.exports.createChangelogTable= function(callback) {
