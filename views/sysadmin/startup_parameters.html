@@ -6,9 +6,9 @@
 </head>
 <body>
 <div id="sa_startup_params_PageContent" style="width:510px;height:100%; margin:0;padding:0;">
-    <table width="100%" height="100%">
+    <table width="100%"> <!--height="100%"-->
         <tr>
-            <td height="20px">
+            <td height="20px"> <!--height="20px"-->
                 <table width="100%">
                     <tr>
                         <th height="30px" width="180px"><b>system startup parameters:</b></th>
@@ -21,7 +21,7 @@
             </td>
         </tr>
         <tr>
-            <td height="1px">
+            <td height="100px"> <!--height="1px"-->
                 <table width="500px">
                     <tr>
                         <td><label for="db.host">db.host </label></td>
@@ -44,7 +44,7 @@
         </tr>
 
         <tr>
-            <td height="30px">
+            <td height="40px"> <!--height="30px"-->
                 <button id="SA_startup_params_BtnAppLocalConfigLoad">Load settings</button>
                 <button id="SA_startup_params_BtnAppLocalConfigSaveAndReconnect">Store settings & reconnect to
                     database
@@ -52,15 +52,25 @@
             </td>
         </tr>
         <tr>
-                <td height="30px" >
-                    <button id="create_db_btn">Create DB</button>
-                </td>
-                <td id="create_db_result" style="font-weight: bold; width: 400px; border:black 1px">
-                    <!--<div id="create_db_result" style="font-weight: bold; width: 400px; border:black 1px"></div>-->
-                </td>
-        </tr>
-        <tr>
-            <td >
+            <td height="30px"> <!--height="30px"-->
+                <table>
+                    <tr>
+                        <td style="width:75px">
+                            <button id="create_db_btn">Create DB</button>
+                        </td>
+                        <td>
+                            <td id="create_db_result" style="font-weight: bold; width: 400px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:75px">
+                            <button id="drop_db_btn">Drop DB</button>
+                        </td>
+                        <td>
+                        <td id="drop_db_result" style="font-weight: bold; width: 400px;">
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
@@ -97,7 +107,10 @@
                 var sa_startup_params_appLocalConfig = document.getElementById("sa_startup_params_appLocalConfig");
                 var reloadBtn = new Button({id: "SA_startup_params_BtnAppLocalConfigLoad"}, "SA_startup_params_BtnAppLocalConfigLoad");
                 var saveAndReconnectBtn = new Button({id: "SA_startup_params_BtnAppLocalConfigSaveAndReconnect"}, "SA_startup_params_BtnAppLocalConfigSaveAndReconnect");
-                var createDBBtn= new Button({id: "create_db_btn"}, "create_db_btn");
+                var createDBBtn= new Button({id: "create_db_btn"}, "create_db_btn"); //drop_db_btn
+                createDBBtn.domNode.firstChild.setAttribute("style", "width:70px;");
+                var dropDBBtn= new Button({id: "drop_db_btn"}, "drop_db_btn");
+                dropDBBtn.domNode.firstChild.setAttribute("style", "width:70px;");
 
               //  var infoDialog=new Dialog({});
                 var dialogTable=document.getElementById("dialog_table");
@@ -192,53 +205,88 @@
                             });
                 };
                 createDBBtn.onClick=function() {
+                    adminAuthDialog.action="createDB";
+                    adminAuthDialog.show();
+                };
+                dropDBBtn.onClick=function(){
+                    adminAuthDialog.action="dropDB";
                     adminAuthDialog.show();
                 };
 
-                adminAuthDialog.onExecute=function(){
-                    var newDB={};
-                    newDB.adminName=document.getElementById("admin_name").value;
-                    newDB.adminPassword=document.getElementById("admin_password").value;
-                        newDB.host= hostInput.get('value');
-                        // "port": portInput.get('value'),
-                        newDB.newDatabase=databaseInput.get('value');
-                        newDB.newUser= userInput.get('value');
-                        newDB.newPassword= dbPasswordInput.get('value');
+                adminAuthDialog.onExecute=function(){ //admin_password
+                    if(adminAuthDialog.action=="createDB") createDataBase();
+                    if(adminAuthDialog.action=="dropDB") dropDataBase();
+                    adminAuthDialog.hide();
+                };
+                adminAuthDialog.onCancel=function(){
+                    document.getElementById("admin_password").value="";
+                    adminAuthDialog.hide();
+                };
 
-                    Request.postJSONData({url:  "/sysadmin/create_new_db", data: newDB, consoleLog: true},
+                function createDataBase() {
+                    document.getElementById("drop_db_result").innerHTML = "";
+                    document.getElementById("create_db_result").innerHTML = "";
+                    var newDB = {};
+                    newDB.adminName = document.getElementById("admin_name").value;
+                    newDB.adminPassword = document.getElementById("admin_password").value;
+                    newDB.host = hostInput.get('value');
+                    // "port": portInput.get('value'),
+                    newDB.newDatabase = databaseInput.get('value');
+                    newDB.newUser = userInput.get('value');
+                    newDB.newPassword = dbPasswordInput.get('value');
+
+                    Request.postJSONData({url: "/sysadmin/create_new_db", data: newDB, consoleLog: true},
                             function (success, data) {
+                                document.getElementById("admin_password").value="";
+                                console.log("data=", data);
                                 if (!success) {
                                     sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
                                 }
                                 if (data.error) {
-                                    document.getElementById("create_db_result").innetHTML="FAIL CREATE BD!\nReason:"+data.error;
-//                                    infoDialog.set("title", "Authorization FAILED!" );
-//                                    infoDialog.set("content", data["error"] );
-//                                    infoDialog.set("style", "width:300px" );
-//                                    infoDialog.show();
-                                }else{
-                                    document.getElementById("create_db_result").innetHTML="DB CREATED SUCCESSFULLY!";
+                                    document.getElementById("create_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"</b>";
+                                    if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
+                                } else {
+                                    var successMsgStr = '';
+                                    if (data.DBCreated) successMsgStr += data.DBCreated + " ";
+                                    if (data.userCreated) successMsgStr += data.userCreated + " ";
+                                    if (data.userExists) successMsgStr += data.userExists + " ";
+                                    if (data.accessAdded) successMsgStr += data.accessAdded;
+                                    document.getElementById("create_db_result").innerHTML = successMsgStr;
+                                    //saveAndReconnectBtn.onClick();
+                                }
+                                saveAndReconnectBtn.onClick();
+                            });
+                }
+                function dropDataBase(){
+                    document.getElementById("drop_db_result").innerHTML = "";
+                    document.getElementById("create_db_result").innerHTML = "";
+                    var DB = {};
+                    DB.adminName = document.getElementById("admin_name").value;
+                    DB.adminPassword = document.getElementById("admin_password").value;
+                    DB.host = hostInput.get('value');
+                    // "port": portInput.get('value'),
+                    DB.newDatabase = databaseInput.get('value');
+                    DB.newUser = userInput.get('value');
+                    DB.newPassword = dbPasswordInput.get('value');
+
+                    Request.postJSONData({url: "/sysadmin/drop_db", data: DB, consoleLog: true},
+                            function (success, data) {                                      console.log("data=", data);
+                                document.getElementById("admin_password").value="";
+                                if (!success) {
+                                    sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
+                                }
+                                if (data.error) {
+                                    document.getElementById("drop_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"<b>";
+                                    if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
+
+                                } else {
+                                    var successMsgStr = data.dropped;
+                                    document.getElementById("drop_db_result").innerHTML = successMsgStr;
                                     saveAndReconnectBtn.onClick();
                                 }
-//                                else {
-//                                    sa_startup_params_appLocalConfig.innerHTML = "<div><b>Configuration saved.</b></div>";
-//                                }
-//                                if (data.DBConnectError) {
-//                                    sa_startup_params_appLocalConfig.innerHTML=
-//                                            sa_startup_params_appLocalConfig.innerHTML+ "<br><div><b style='color:red'>Failed connect to database ! Reason:" + data["DBConnectError"] + "</b></div>";
-//                                } else {
-//                                    sa_startup_params_appLocalConfig.innerHTML =
-//                                            sa_startup_params_appLocalConfig.innerHTML+ "<br><div><b>Reconnected to database.</b></div>";
-//                                }
-
-                                adminAuthDialog.hide();
-                                if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
+                                saveAndReconnectBtn.onClick();
                             });
-
-
-                };
-
-                /*---initing on load---*/
+                }
                 sa_startup_params_PageContent.getAppConfiguration();
             });
 </script>

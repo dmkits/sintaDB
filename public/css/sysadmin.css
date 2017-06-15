@@ -45,6 +45,8 @@ table {
     border-collapse: collapse;
     font-size : 11px;
     font-family : Tahoma,Arial,Helvetica;
+    /*margin:0;*/
+    /*padding:0;*/
 }
 th {
     font-family : Tahoma,Arial,Helvetica;
@@ -54,6 +56,14 @@ th {
     background: #EFEFEF;
     color : black;
 }
+/*td{*/
+    /*margin:0;*/
+    /*padding:0*/
+/*}*/
+/*tr{*/
+    /*margin:0;*/
+    /*padding:0*/
+/*}*/
 input {
     font-size : 11px;
     font-family : Tahoma,Arial,Helvetica;

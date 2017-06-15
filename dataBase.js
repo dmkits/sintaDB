@@ -48,13 +48,12 @@ module.exports.mySQLAdminConnection = function (connParams, callback) {
         connection.end(function (err) {
             if (err) {
                 connection=null;
-                console.log("err  connection.end =", err); //????????????????????
+                callback(err);           console.log("err  connection.end =", err);
                 return;
             }
-            connection=null;
             connection = mysql.createConnection(connParams);
             connection.connect(function (err) {
-                if (err) {             console.log("createConnection err=",err);
+                if (err) {              console.log("createConnection err=",err);
                     connection=null;
                     callback(err);
                     return;
@@ -76,12 +75,10 @@ module.exports.mySQLAdminConnection = function (connParams, callback) {
     });
 };
 
-module.exports.createNewDB= function(DBName,callback) {      //console.log("DBName=",DBName);
-    //var reqSql = new sql.Request(conn);
-   // var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
-    connection.query('CREATE SCHEMA IF NOT EXISTS '+DBName,
+module.exports.checkIfDBExists= function(DBName,callback) {
+    connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+DBName+"'",
         function (err, recordset) {
-            if (err) {            //console.log("err=",err);
+            if (err) {
                 callback(err);
                 return;
             }
@@ -90,39 +87,68 @@ module.exports.createNewDB= function(DBName,callback) {      //console.log("DBNa
     );
 };
 
-module.exports.createNewUser= function(host,newUserName,newUserPassword,callback) {      //console.log("DBName=",DBName);
-    //var reqSql = new sql.Request(conn);
-    // var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
-    connection.query("CREATE USER IF NOT EXISTS '"+newUserName+"'@'"+host+"' IDENTIFIED BY '"+newUserPassword+"'",
-        function (err, recordset) {
-            if (err) {           // console.log("err createNewUser=",err);
+module.exports.createNewDB= function(DBName,callback) {
+    connection.query('CREATE SCHEMA '+DBName,
+        function (err) {
+            if (err) {
                 callback(err);
                 return;
             }
-            callback(null,"user created");
+            callback(null, DBName+" Database created!");
         }
     );
 };
-//grantUserAccess
 
-
-module.exports.grantUserAccess= function(host,newUserName,newDBName,callback) {      console.log("grantUserAccess=", host,newUserName,newDBName);
-    //var reqSql = new sql.Request(conn);
-    // var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
-    var strQuery="GRANT ALL PRIVILEGES ON "+newDBName+".* TO '"+newUserName+"'@'"+host+"' WITH GRANT OPTION"; console.log("strQuery=",strQuery);
-    connection.query(strQuery,
-        function (err ) {
-            if (err) {            //console.log("err grantUserAccess=",err);
+module.exports.checkIfUserExists= function(newUserName,callback) {
+    connection.query("select * from mysql.user where user='"+newUserName+"'",
+        function (err, recordset) {
+            if (err) {
                 callback(err);
                 return;
             }
-            callback(null,"user granted privileges");
+            callback(null,recordset);
+        }
+    );
+};
+
+module.exports.createNewUser= function(host,newUserName,newUserPassword,callback) {
+    connection.query("CREATE USER '"+newUserName+"'@'"+host+"' IDENTIFIED BY '"+newUserPassword+"'",
+        function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,"User "+ newUserName+" created!");
+        }
+    );
+};
+
+module.exports.grantUserAccess= function(host,userName,newDBName,callback) {
+    var strQuery="GRANT ALL PRIVILEGES ON "+newDBName+".* TO '"+userName+"'@'"+host+"' WITH GRANT OPTION"; console.log("strQuery=",strQuery);
+    connection.query(strQuery,
+        function (err ) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,userName+" granted privileges!");
+        }
+    );
+};
+
+module.exports.dropDB= function(DBName,callback) {
+    connection.query("DROP DATABASE "+ DBName,
+        function (err ) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,DBName+" dropped!");
         }
     );
 };
 
 module.exports.createChangelogTable= function(callback) {
-    //var reqSql = new sql.Request(conn);
    var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
     connection.query(query_str,
         function (err, recordset) {

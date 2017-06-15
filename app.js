@@ -208,6 +208,7 @@ app.post("/sysadmin/startup_parameters/store_app_config_and_reconnect", function
 //});
 ///sysadmin/create_new_db
 
+
 app.post("/sysadmin/create_new_db", function (req, res) {
     log.info('sysadmin/create_new_db');
     var host=req.body.host;
@@ -228,32 +229,108 @@ app.post("/sysadmin/create_new_db", function (req, res) {
                 res.send(outData);
                 return;
             }
-        database.createNewDB(newDBName,function(err){
-            if(err){                console.log("createNewDB err=", err);
+        database.checkIfDBExists(newDBName, function(err, result){
+            if (err) {                  console.log("checkIfDBExists err=", err);
                 outData.error=err.message;
                 res.send(outData);
                 return;
+            }if(result.length>0){
+                outData.error="Impossible to create DB! Database "+newDBName+" is already exists!";
+                res.send(outData);
+                return;
             }
-            database.createNewUser(host,newUserName,newUserPassword, function(err){
-                if(err){                console.log("createNewUser err=", err);
+            database.createNewDB(newDBName,function(err, ok){
+                if(err){                console.log("createNewDB err=", err);
                     outData.error=err.message;
                     res.send(outData);
                     return;
                 }
-                database.grantUserAccess(host,newUserName,newDBName, function(err, ok){
-                    if(err){                console.log("createNewUser err=", err);
+                outData.DBCreated=ok;
+                database.checkIfUserExists(newUserName,function(err,result){
+                    if(err){                console.log("checkIfUserExists err=", err);
                         outData.error=err.message;
                         res.send(outData);
                         return;
                     }
-                    outData.ok=ok;
-                    res.send(outData);
-                })
+                    if(result.length>0){
+                    outData.userExists="User "+newUserName+" is already exists!";
+                        database.grantUserAccess(host,newUserName,newDBName, function(err, ok){
+                            if(err){                console.log("createNewUser err=", err);
+                                outData.error=err.message;
+                                res.send(outData);
+                                return;
+                            }
+                            outData.accessAdded=ok;
+                            res.send(outData);
+                        })
+                    }else{
+                        database.createNewUser(host,newUserName,newUserPassword, function(err, ok){
+                            if(err){                console.log("createNewUser err=", err);
+                                outData.error=err.message;
+                                res.send(outData);
+                                return;
+                            }
+                            outData.userCreated=ok;
+                            database.grantUserAccess(host,newUserName,newDBName, function(err, ok){
+                                if(err){                console.log("createNewUser err=", err);
+                                    outData.error=err.message;
+                                    res.send(outData);
+                                    return;
+                                }
+                                outData.accessAdded=ok;
+                                res.send(outData);
+                            })
+                        });
+                    }
+                });
             });
         });
     });
 });
 
+app.post("/sysadmin/drop_db", function (req, res) {
+    log.info("/sysadmin/drop_db");
+    var host = req.body.host;
+    var DBName = req.body.newDatabase;
+   // var userName = req.body.newUser;
+   // var userPassword = req.body.newPassword;
+
+    var connParams = {
+        host: host,
+        user: req.body.adminName,
+        password: req.body.adminPassword
+    };
+    var outData = {};
+
+    database.mySQLAdminConnection(connParams, function (err) {
+        if (err) {                                                                      console.log("mySQLAdminConnection err=", err);
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        database.checkIfDBExists(DBName, function (err, result) {
+            if (err) {                                                                  console.log("checkIfDBExists err=", err);
+                outData.error = err.message;
+                res.send(outData);
+                return;
+            }
+            if (result.length == 0) {
+                outData.error = "Impossible to drop DB! Database " + DBName + " is not exists!";
+                res.send(outData);
+                return;
+            }
+            database.dropDB(DBName,function(err,ok){
+                if (err) {                                                               console.log("checkIfDBExists err=", err);
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                outData.dropped=ok;
+                res.send(outData);
+            })
+        });
+    });
+});
 
 app.get("/sysadmin/changeLog", function (req, res) {
     log.info("URL: /sysadmin/changeLog");
@@ -272,12 +349,8 @@ app.get("/sysadmin/changeLog/change_log", function (req, res) {
         ,{ "data":"Object", "name":"Object", "width":120, "type":"text"}//,"dateFormat":"DD.MM.YYYY HH:mm:ss
         ,{ "data":"PosNumber", "name":"PosNumber", "width":80, "type":"numeric"}
     );
-  //  var bdate = req.query.BDATE, edate = req.query.EDATE;
-
-  //  if (!bdate&&!edate) {
         res.send(outData);
         return;
-   // }
 });
 
 server.listen(port, function (err) {
