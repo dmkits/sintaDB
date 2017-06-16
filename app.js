@@ -427,6 +427,80 @@ app.post("/sysadmin/backup_db", function (req, res) {
     });
 });
 
+app.post("/sysadmin/restore_db", function (req, res) {
+    log.info("/sysadmin/restore_db");
+    var host = req.body.host;
+    var DBName = req.body.database;
+    var adminUser=req.body.adminName;
+    var adminPassword=req.body.adminPassword;
+    var backupFileName=req.body.restoreFilename;
+    // var userName = req.body.user;
+    // var userPassword = req.body.password;
+    var connParams = {
+        host: host,
+        user: adminUser,
+        password: adminPassword
+    };
+    var backupParam={
+        host: host,
+        user: adminUser,
+        password: adminPassword,
+        database:DBName,
+        fileName:backupFileName+'.sql'
+    };
+    var outData = {};
+
+    database.mySQLAdminConnection(connParams, function (err) {
+        if (err) {                                                                      console.log("mySQLAdminConnection err=", err);
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        database.checkIfDBExists(DBName, function (err, result) {
+            if (err) {                                                                  console.log("checkIfDBExists err=", err);
+                outData.error = err.message;
+                res.send(outData);
+                return;
+            }
+            if (result.length == 0) {
+                outData.error = "Impossible to restore! Database " + DBName + " is not exists!";
+                res.send(outData);
+                return;
+            }
+            //if(req.body.rewrite){
+            //    database.backupDB(backupParam,function(err,ok){
+            //        if (err) {                                                                  console.log("checkIfDBExists err=", err);
+            //            outData.error = err.message;
+            //            res.send(outData);
+            //            return;
+            //        }
+            //        outData.backup=ok;
+            //        res.send(outData);
+            //    })
+            //}else {
+                fs.readdir('./backups/', function (err, files) {
+                    var fileToRestore;
+                    for (var i in files) {
+                        if (files[i] == restoreFileName) {
+                            fileToRestore=files[i];
+                        }
+                    }
+                    //database.restoreDB(backupParam, function (err, ok) {
+                    //    if (err) {
+                    //        console.log("checkIfDBExists err=", err);
+                    //        outData.error = err.message;
+                    //        res.send(outData);
+                    //        return;
+                    //    }
+                    //    outData.backup = ok;
+                    //    res.send(outData);
+                    //})
+                });
+           // }
+        });
+    });
+});
+
 
 app.get("/sysadmin/changeLog", function (req, res) {
     log.info("URL: /sysadmin/changeLog");

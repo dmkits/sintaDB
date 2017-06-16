@@ -17,6 +17,7 @@
     "iconv-lite": "^0.4.17",
     "mssql": "~3.3.0",
     "mysql": "^2.13.0",
+    "mysql-tools": "^0.1.2",
     "mysqldump": "^1.4.2",
     "path": "~0.12.7",
     "request": "^2.81.0",

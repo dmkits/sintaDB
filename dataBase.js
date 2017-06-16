@@ -1,6 +1,7 @@
 var fs = require('fs');
 //var sql = require('mssql');
-var mysqlDump = require('mysqldump');
+//var mysqlDump = require('mysqldump');
+var  MysqlTools= require('mysql-tools');
 var mysql      = require('mysql');
 var app = require('./app');
 var dbConfig;
@@ -150,6 +151,40 @@ module.exports.dropDB= function(DBName,callback) {
 };
 
 module.exports.backupDB= function(backupParam,callback) {
+    //mysqlDump({
+    //    host: backupParam.host,
+    //    user: backupParam.user,
+    //    password: backupParam.password,
+    //    database: backupParam.database,
+    //    dest:'./backups/'+backupParam.fileName
+    //},function (err) {
+    //        if (err) {
+    //            callback(err);
+    //            return;
+    //        }
+    //        callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
+    //    });
+
+    var tool = new MysqlTools();
+    tool.dumpDatabase({
+        host: backupParam.host
+        , user: backupParam.user
+        , password: backupParam.password
+        , dumpPath: './backups/'/*+backupParam.fileName*/
+        , database: backupParam.database
+    }, function (error, output, message, dumpFileName) {
+        if (error instanceof Error) {
+            console.log(error);
+        } else {
+            console.log(output);
+            console.log(message);
+            console.log(dumpFileName);
+            callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
+        }
+    });
+};
+
+module.exports.restoreDB= function(backupParam,callback) {
     mysqlDump({
         host: backupParam.host,
         user: backupParam.user,
@@ -157,13 +192,14 @@ module.exports.backupDB= function(backupParam,callback) {
         database: backupParam.database,
         dest:'./backups/'+backupParam.fileName
     },function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
-        });
+        if (err) {
+            callback(err);
+            return;
+        }
+        callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
+    });
 };
+
 module.exports.createChangelogTable= function(callback) {
    var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
     connection.query(query_str,
