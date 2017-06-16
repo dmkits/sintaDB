@@ -150,22 +150,20 @@ module.exports.dropDB= function(DBName,callback) {
 };
 
 module.exports.backupDB= function(backupParam,callback) {
-
     mysqlDump({
         host: backupParam.host,
         user: backupParam.user,
         password: backupParam.password,
         database: backupParam.database,
-        dest:'./data.sql'
+        dest:'./backups/'+backupParam.fileName
     },function (err) {
             if (err) {
                 callback(err);
                 return;
             }
-            callback(null,backupParam.database+" backup is ready!");
+            callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
         });
 };
-
 module.exports.createChangelogTable= function(callback) {
    var query_str=fs.readFile("./scripts/createChangeLog.sql","utf-8");
     connection.query(query_str,
@@ -179,11 +177,11 @@ module.exports.createChangelogTable= function(callback) {
     );
 };
 
-function formatDate(date){
-    var dch = date.split("");
-    var newDateFormat = dch[0] + dch[1] + dch[2] + dch[3] + "-" + dch[4] + dch[5] + "-" + dch[6] + dch[7] + " " + dch[8] + dch[9] + ":" + dch[10] + dch[11] + ":" + dch[12] + dch[13];
-    return newDateFormat;
-}
+//function formatDate(date){
+//    var dch = date.split("");
+//    var newDateFormat = dch[0] + dch[1] + dch[2] + dch[3] + "-" + dch[4] + dch[5] + "-" + dch[6] + dch[7] + " " + dch[8] + dch[9] + ":" + dch[10] + dch[11] + ":" + dch[12] + dch[13];
+//    return newDateFormat;
+//}
 
 function detectPaymentForm(PaymentForm){
     return  PaymentForm == '0' ? 1 : 2;

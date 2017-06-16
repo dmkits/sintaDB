@@ -358,9 +358,9 @@ app.post("/sysadmin/backup_db", function (req, res) {
     var DBName = req.body.database;
     var adminUser=req.body.adminName;
     var adminPassword=req.body.adminPassword;
+    var backupFileName=req.body.backupFilename;
     // var userName = req.body.user;
     // var userPassword = req.body.password;
-
     var connParams = {
         host: host,
         user: adminUser,
@@ -371,7 +371,7 @@ app.post("/sysadmin/backup_db", function (req, res) {
         user: adminUser,
         password: adminPassword,
         database:DBName,
-        dest:'./data.sql'
+        fileName:backupFileName+'.sql'
     };
     var outData = {};
 
@@ -392,15 +392,37 @@ app.post("/sysadmin/backup_db", function (req, res) {
                 res.send(outData);
                 return;
             }
-            database.backupDB(backupParam,function(err,ok){
-                if (err) {                                                               console.log("checkIfDBExists err=", err);
-                    outData.error = err.message;
+            if(req.body.rewrite){
+                database.backupDB(backupParam,function(err,ok){
+                    if (err) {                                                                  console.log("checkIfDBExists err=", err);
+                        outData.error = err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    outData.backup=ok;
                     res.send(outData);
-                    return;
-                }
-                outData.backup=ok;
-                res.send(outData);
-            })
+                })
+            }else {
+                fs.readdir('./backups/', function (err, files) {
+                    for (var i in files) {
+                        if (files[i] == backupFileName) {
+                            outData.fileExists = true;
+                            res.send(outData);
+                            return;
+                        }
+                    }
+                    database.backupDB(backupParam, function (err, ok) {
+                        if (err) {
+                            console.log("checkIfDBExists err=", err);
+                            outData.error = err.message;
+                            res.send(outData);
+                            return;
+                        }
+                        outData.backup = ok;
+                        res.send(outData);
+                    })
+                });
+            }
         });
     });
 });
