@@ -153,6 +153,23 @@ module.exports.dropDB= function(DBName,callback) {
     );
 };
 
+
+module.exports.isDBEmpty= function(DBName,callback) {
+    var isEmpty;
+    connection.query("SELECT table_name FROM information_schema.tables where table_schema='"+DBName+"'",
+        function (err,recordset ) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            if(recordset.length==0) isEmpty=true;
+
+            console.log("isEmpty=",isEmpty);
+            callback(null,isEmpty);
+        }
+    );
+};
+
 module.exports.backupDB= function(backupParam,callback) {
     mysqlDump({
         host: backupParam.host,
@@ -214,6 +231,7 @@ module.exports.restoreDB= function(restoreParams,callback) {
         , password: restoreParams.password
         , sqlFilePath: './backups/' + restoreParams.fileName
         , database: restoreParams.database
+        ,dropTable:true
     }, function (error, output, message) {
         if (error instanceof Error) {
             console.log(error);

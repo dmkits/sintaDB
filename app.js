@@ -434,8 +434,8 @@ app.post("/sysadmin/restore_db", function (req, res) {
     var adminUser = req.body.adminName;
     var adminPassword = req.body.adminPassword;
     var restoreFileName = req.body.restoreFilename + '.sql';
-    // var userName = req.body.user;
-    // var userPassword = req.body.password;
+    var userName = req.body.user;
+    var userPassword = req.body.password;
     var connParams = {
         host: host,
         user: adminUser,
@@ -453,7 +453,7 @@ app.post("/sysadmin/restore_db", function (req, res) {
     database.mySQLAdminConnection(connParams, function (err) {
         console.log("mySQLAdminConnection");
         if (err) {
-            console.log("mySQLAdminConnection err=", err);
+            console.log("mySQLAdminConnection err=", err,"err.message=",err.message);
             outData.error = err.message;
             res.send(outData);
             return;
@@ -490,17 +490,102 @@ app.post("/sysadmin/restore_db", function (req, res) {
                     return;
                 }
 
-                database.restoreDB(restoreParams, function (err, ok) {
-                    console.log("restoreDB");
-                    if (err) {
-                        console.log("restoreDB err=", err);
-                        outData.error = err.message;
-                        res.send(outData);
-                        return;
-                    }
-                    outData.restore = ok;
-                    res.send(outData);
-                })
+                if (req.body.rewrite) {
+                    database.dropDB(DBName, function (err, ok) {
+                        if (err) {
+                            console.log("checkIfDBExists err=", err);
+                            outData.error = err.message;
+                            res.send(outData);
+                            return;
+                        }
+                        outData.DBdropped = ok;
+                        database.createNewDB(DBName, function (err, ok) {
+                            if (err) {
+                                console.log("createNewDB err=", err);
+                                outData.error = err.message;
+                                res.send(outData);
+                                return;
+                            }
+                            outData.DBCreated = ok;
+                            database.checkIfUserExists(userName, function (err, result) {
+                                if (err) {
+                                    console.log("checkIfUserExists err=", err);
+                                    outData.error = err.message;
+                                    res.send(outData);
+                                    return;
+                                }
+                                if (result.length > 0) {
+                                    outData.userExists = "User " + userName + " is already exists!";
+                                    database.grantUserAccess(host, userName, DBName, function (err, ok) {
+                                        if (err) {
+                                            console.log("createNewUser err=", err);
+                                            outData.error = err.message;
+                                            res.send(outData);
+                                            return;
+                                        }
+                                        outData.accessAdded = ok;
+                                        res.send(outData);
+                                    })
+                                } else {
+                                    database.createNewUser(host, userName, userPassword, function (err, ok) {
+                                        if (err) {
+                                            console.log("createNewUser err=", err);
+                                            outData.error = err.message;
+                                            res.send(outData);
+                                            return;
+                                        }
+                                        outData.userCreated = ok;
+                                        database.grantUserAccess(host, userName, DBName, function (err, ok) {
+                                            if (err) {
+                                                console.log("createNewUser err=", err);
+                                                outData.error = err.message;
+                                                res.send(outData);
+                                                return;
+                                            }
+                                            database.restoreDB(restoreParams, function (err, ok) {
+                                                console.log("restoreDB");
+                                                if (err) {
+                                                    console.log("restoreDB err=", err);
+                                                    outData.error = err.message;
+                                                    res.send(outData);
+                                                    return;
+                                                }
+                                                outData.restore = ok;
+                                                res.send(outData);
+                                            })
+                                        })
+                                    });
+                                }
+                            });
+                        });
+                    })
+                } else {
+                    database.isDBEmpty(DBName, function (err, isEmpty) {
+                        if (err) {
+                            console.log("restoreDB err=", err);
+                            outData.error = err.message;
+                            res.send(outData);
+                            return;
+                        }
+                        if (isEmpty) {
+                            database.restoreDB(restoreParams, function (err, ok) {
+                                console.log("restoreDB");
+                                if (err) {
+                                    console.log("restoreDB err=", err);
+                                    outData.error = err.message;
+                                    res.send(outData);
+                                    return;
+                                }
+                                outData.restore = ok;
+                                res.send(outData);
+                            })
+                        } else {
+                            outData.dropDBConfirm = "dropDBConfirm";
+                            res.send(outData);
+                        }
+                    });
+                }
+
             });
 
         });

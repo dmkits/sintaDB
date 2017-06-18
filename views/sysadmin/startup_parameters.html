@@ -194,6 +194,11 @@
                     content: restoreDialogTable,
                     title: "Restore from file"
                 }, "restoreDialog");
+                var rewriteDBDialog = new ConfirmDialog({
+                    id: "rewriteDBDialog",
+                    content: "Database contains data!\n Rewrite Database?",
+                    title: "Rewrite Database?"
+                }, "rewriteDBDialog");
 
                 adminAuthDialog.onExecute=function(){ console.log("adminAuthDialog adminAuthDialog.action=",adminAuthDialog.action);
                     if(adminAuthDialog.action=="createDB") createDataBase();
@@ -217,10 +222,13 @@
                     restoreDataBase();
                     restoreDialog.hide();
                 };
-
+                rewriteDBDialog.onExecute=function(){
+                    restoreDataBase(true);
+                    restoreDialog.hide();
+                };
                 adminAuthDialog.on("keypress", function (event) {
                     if (event.keyCode == keys.ENTER) {
-                        adminAuthDialog.onExecute();
+                        rewriteDBDialog.onExecute();
                     }
                 });
                 backupDialog.on("keypress", function (event) {
@@ -229,6 +237,11 @@
                     }
                 });
                 restoreDialog.on("keypress", function (event) {
+                    if (event.keyCode == keys.ENTER) {
+                        restoreDialog.onExecute();
+                    }
+                });
+                rewriteDBDialog.on("keypress", function (event) {
                     if (event.keyCode == keys.ENTER) {
                         restoreDialog.onExecute();
                     }
@@ -425,7 +438,7 @@
                 }
 
 
-                function restoreDataBase(){                             console.log("restoreDataBase");
+                function restoreDataBase(rewrite){                             console.log("restoreDataBase");
                     cleanResultFields();
                     var DB = {};
                     DB.adminName = authAdminInfo.adminName;             console.log("DB.adminName=",DB.adminName);
@@ -436,27 +449,29 @@
                     DB.database = databaseInput.get('value');
                     DB.user = userInput.get('value');
                     DB.password = dbPasswordInput.get('value');
-                   // if(rewrite)DB.rewrite=true;
+                    if(rewrite)DB.rewrite=true;
 
                     Request.postJSONData({url: "/sysadmin/restore_db", data: DB, consoleLog: true},
-                            function (success, data){                                      console.log("data=", data);
-                                document.getElementById("admin_password").value="";
-                                document.getElementById("restore_fileName").value="";
+                            function (success, data) {
+                                console.log("data=", data);
+                                document.getElementById("admin_password").value = "";
+                                document.getElementById("restore_fileName").value = "";
                                 if (!success) {
                                     sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
                                 }
                                 if (data.error) {
-                                    document.getElementById("restore_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error+"<b>";
+                                    document.getElementById("restore_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error + "<b>";
                                     sa_startup_params_PageContent.getAppConfiguration();
                                     if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
-                                }else {
+                                }else if (data.dropDBConfirm) {
+                                    rewriteDBDialog.show();
+                                } else {
                                     var successMsgStr = data.restore;
                                     document.getElementById("restore_db_result").innerHTML = successMsgStr;
                                 }
                                 saveAndReconnectBtn.onClick();
                             });
                 }
-
                 function cleanResultFields(){
                     document.getElementById("drop_db_result").innerHTML = "";
                     document.getElementById("create_db_result").innerHTML = "";
