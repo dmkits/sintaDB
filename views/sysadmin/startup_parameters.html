@@ -116,6 +116,7 @@
     </tr>
 </table>
 
+<div id="adminAuthDialog"></div>
 
 </body>
 <script type="text/javascript">
@@ -409,22 +410,20 @@
                     if(rewrite)DB.rewrite=true;
                                                                                     console.log("DB=",DB);
                     Request.postJSONData({url: "/sysadmin/backup_db", data: DB, consoleLog: true},
-                            function (success, data) {                                      console.log("data=", data);
+                            function (success, data) {
+                                document.getElementById("admin_password").value="";
+                                document.getElementById("backup_fileName").value="";console.log("data=", data);
                                 if (!success) {
                                     sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
                                     return;
                                 }
                                 if (data.error) {
-                                    document.getElementById("admin_password").value="";
-                                    document.getElementById("backup_fileName").value="";
                                     document.getElementById("backup_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error + "<b>";
                                     sa_startup_params_PageContent.getAppConfiguration();
                                     if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
                                 }else if(data.fileExists){
                                     rewriteBackupDialog.show();
                                 }else {
-                                    document.getElementById("admin_password").value="";
-                                    document.getElementById("backup_fileName").value="";
                                     var successMsgStr = data.backup;
                                     document.getElementById("backup_db_result").innerHTML = successMsgStr;
                                 }
@@ -454,21 +453,20 @@
 
                     Request.postJSONData({url: "/sysadmin/restore_db", data: DB, consoleLog: true},
                             function (success, data) {
+                                document.getElementById("admin_password").value="";
+                                document.getElementById("backup_fileName").value="";
                                 console.log("data=", data);
                                 if (!success) {
                                     sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";
                                 }
                                 if (data.error) {
-                                    document.getElementById("admin_password").value = "";
-                                    document.getElementById("restore_fileName").value = "";
+
                                     document.getElementById("restore_db_result").innerHTML = "<b style='color:red'>FAIL! Reason:" + data.error + "<b>";
                                     sa_startup_params_PageContent.getAppConfiguration();
                                     if (sa_startup_params_PageContent.getParent().updateDBState)  sa_startup_params_PageContent.getParent().updateDBState();
                                 }else if (data.dropDBConfirm) {
                                     rewriteDBDialog.show();
                                 } else {
-                                    document.getElementById("admin_password").value = "";
-                                    document.getElementById("restore_fileName").value = "";
                                     var successMsgStr = '';
                                     if(data.DBdropped)successMsgStr=successMsgStr+data.DBdropped;
                                     if(data.DBCreated)successMsgStr=successMsgStr+data.DBCreated;
