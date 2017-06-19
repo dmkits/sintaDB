@@ -129,7 +129,7 @@ module.exports.createNewUser= function(host,newUserName,newUserPassword,callback
 };
 
 module.exports.grantUserAccess= function(host,userName,newDBName,callback) {
-    var strQuery="GRANT ALL PRIVILEGES ON "+newDBName+".* TO '"+userName+"'@'"+host+"' WITH GRANT OPTION"; console.log("strQuery=",strQuery);
+    var strQuery="GRANT ALL PRIVILEGES ON "+newDBName+".* TO '"+userName+"'@'"+host+"' WITH GRANT OPTION";
     connection.query(strQuery,
         function (err ) {
             if (err) {
@@ -154,18 +154,18 @@ module.exports.dropDB= function(DBName,callback) {
 };
 
 
-module.exports.isDBEmpty= function(DBName,callback) {
-    var isEmpty;
+module.exports.isDBEmpty= function(DBName,callback) {         console.log("isDBEmpty DBName=",DBName);
+   // var isEmpty;
     connection.query("SELECT table_name FROM information_schema.tables where table_schema='"+DBName+"'",
-        function (err,recordset ) {
+        function (err,recordset ) {        console.log("isDBEmpty recordset=",recordset);
             if (err) {
                 callback(err);
                 return;
             }
-            if(recordset.length==0) isEmpty=true;
+           // if(recordset.length==0) isEmpty=true;
 
-            console.log("isEmpty=",isEmpty);
-            callback(null,isEmpty);
+            //console.log("isEmpty=",isEmpty);
+            callback(null,recordset[0]);
         }
     );
 };
@@ -206,24 +206,6 @@ module.exports.backupDB= function(backupParam,callback) {
 }
 
 module.exports.restoreDB= function(restoreParams,callback) {
-//    mysqlDump({
-//        host: backupParam.host,
-//        user: backupParam.user,
-//        password: backupParam.password,
-//        database: backupParam.database,
-//        dest:'./backups/'+backupParam.fileName
-//    },function (err) {
-//        if (err) {
-//            callback(err);
-//            return;
-//        }
-//        callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
-//    });
-//};
-//if(connection){
-//    connection.end();
-//    connection=null;
-//}
     var tool = new MysqlTools();
     tool.restoreDatabase({
         host: restoreParams.host
@@ -231,15 +213,13 @@ module.exports.restoreDB= function(restoreParams,callback) {
         , password: restoreParams.password
         , sqlFilePath: './backups/' + restoreParams.fileName
         , database: restoreParams.database
-        ,dropTable:true
+       // ,dropTable:true
     }, function (error, output, message) {
-        if (error instanceof Error) {
-            console.log(error);
+        if (error) {
+            console.log("restoreDatabase error=",error);
             callback(error);
         } else {
-            console.log(output);
-            console.log(message);
-            callback(null,"Database restored successfully!");
+            callback(null,message);
         }
     });
 };

@@ -376,7 +376,7 @@ app.post("/sysadmin/backup_db", function (req, res) {
     var outData = {};
 
     database.mySQLAdminConnection(connParams, function (err) {
-        if (err) {                                                                      console.log("mySQLAdminConnection err=", err);
+        if (err) {                                                                   console.log("mySQLAdminConnection err=", err);
             outData.error = err.message;
             res.send(outData);
             return;
@@ -471,14 +471,16 @@ app.post("/sysadmin/restore_db", function (req, res) {
                 res.send(outData);
                 return;
             }
-            fs.readdir('./backups/', function (err, files) {
-                console.log("fs.readdir");
-                var fileToRestore;
-                if (err) {
-                    outData.error = err.message;
-                    res.send(outData);
-                    return;
-                }
+            var fileToRestore;
+            var files = fs.readdirSync('./backups/');                               console.log("files=",files);
+         //   fs.readdir('./backups/', function (err, files) {
+         //       console.log("fs.readdir");
+         //
+         //       if (err) {
+         //           outData.error = err.message;
+         //           res.send(outData);
+         //           return;
+         //       }
                 for (var i in files) {
                     if (files[i] == restoreFileName) {
                         fileToRestore = files[i];
@@ -490,7 +492,7 @@ app.post("/sysadmin/restore_db", function (req, res) {
                     return;
                 }
 
-                if (req.body.rewrite) {
+                if (req.body.rewrite) {                                  console.log("req.body.rewrite  495");
                     database.dropDB(DBName, function (err, ok) {
                         if (err) {
                             console.log("checkIfDBExists err=", err);
@@ -524,7 +526,16 @@ app.post("/sysadmin/restore_db", function (req, res) {
                                             return;
                                         }
                                         outData.accessAdded = ok;
-                                        res.send(outData);
+                                        database.restoreDB(restoreParams, function (err, ok) {
+                                            if (err) {
+                                                console.log("restoreDB err=", err);
+                                                outData.error = err.message;
+                                                res.send(outData);
+                                                return;
+                                            }
+                                            outData.restore = ok;
+                                            res.send(outData);
+                                        })
                                     })
                                 } else {
                                     database.createNewUser(host, userName, userPassword, function (err, ok) {
@@ -542,8 +553,8 @@ app.post("/sysadmin/restore_db", function (req, res) {
                                                 res.send(outData);
                                                 return;
                                             }
+                                            outData.accessAdded = ok;
                                             database.restoreDB(restoreParams, function (err, ok) {
-                                                console.log("restoreDB");
                                                 if (err) {
                                                     console.log("restoreDB err=", err);
                                                     outData.error = err.message;
@@ -559,15 +570,15 @@ app.post("/sysadmin/restore_db", function (req, res) {
                             });
                         });
                     })
-                } else {
-                    database.isDBEmpty(DBName, function (err, isEmpty) {
+                } else {                                                           console.log(" 495");
+                    database.isDBEmpty(DBName, function (err, recodrset) {                 console.log("isDBEmpty recodrset 564=",recodrset);
                         if (err) {
                             console.log("restoreDB err=", err);
                             outData.error = err.message;
                             res.send(outData);
                             return;
                         }
-                        if (isEmpty) {
+                        if (!recodrset) {
                             database.restoreDB(restoreParams, function (err, ok) {
                                 console.log("restoreDB");
                                 if (err) {
@@ -585,9 +596,7 @@ app.post("/sysadmin/restore_db", function (req, res) {
                         }
                     });
                 }
-
-            });
-
+          //  });
         });
     });
 });
