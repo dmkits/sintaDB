@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="dataSourceStorage">
   <data-source name="MySQL - sample_sinta@localhost" uuid="e4666692-9c94-4c8d-bd2d-1e25f82c46ec">
-    <database-info product="MySQL" version="5.7.18-0ubuntu0.16.10.1" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.40 ( Revision: 402933ef52cad9aa82624e80acbea46e3a701ce6 )">
-      <extra-name-characters>#@</extra-name-characters>
-      <identifier-quote-string>`</identifier-quote-string>
-    </database-info>
-    <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact"/>
-    <schema name="" catalog="sample_sinta"/>
-    <table name="shop" schema="" catalog="sample_sinta" type="TABLE">
-      <column name="article" sqlType="INT UNSIGNED" precision="10" scale="0" nullable="false" jdbcType="4" def="MDAwMA=="/>
-      <column name="dealer" sqlType="CHAR" precision="20" scale="0" nullable="false" jdbcType="1" def="Jyc="/>
-      <column name="price" sqlType="DOUBLE" precision="16" scale="2" nullable="false" jdbcType="8" def="MC4wMA=="/>
-      <primary-key name="PRIMARY" columns="article,dealer"/>
-    </table>
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
   </data-source>
 </component>

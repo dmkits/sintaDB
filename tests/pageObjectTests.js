@@ -98,14 +98,41 @@ module.exports={
     'DB Actions Tests': function (browser) {
         var DBActions = browser.page.DBActions();
         DBActions
-            .waitForElementVisible('@createDBBtn', 1000);
-            browser.pause(2000);
-        //.assert.visible('@createDBBtn')
-        DBActions
+            .waitForElementPresent('@createDBBtn', 1000)
+            .assert.visible('@createDBBtn')
+            .moveToElement('@createDBBtn', 5,5)
             .click('@createDBBtn')
-            .waitForElementVisible('@authAdminDialog', 6000);
+            .waitForElementPresent('@authAdminDialog', 6000)
+           // .assert.visible('@authAdminDialog')
+            .assert.containsText('@authAdminDialog','Admin authorisation')
+           // .waitForElementPresent('@authAdminName', 6000)
+            .assert.visible('@authAdminName')
+            .assert.valueContains('@authAdminName','root')
+           // .waitForElementVisible('@authAdminPas', 6000)
+            .assert.visible('@authAdminPas')
+            .assert.valueContains('@authAdminPas','')
+            .submitDialog('@authAdminDialog')
+            .waitForElementVisible('@createDBResultField', 1000)
+            .assert.containsText('@createDBResultField','ACCESS_DENIED_ERROR')
+            .click('@createDBBtn')
+            .authorizeAsAdmin()
+            .assert.containsText('@createDBResultField','Impossible to create DB!')
+
+            .waitForElementVisible('@dropDBBtn', 1000)
+            .click('@dropDBBtn')
+            .submitDialog('@authAdminDialog')
+            .assert.containsText('@dropDBResultField','ACCESS_DENIED_ERROR')
+
+            .waitForElementVisible('@backupBtn', 1000)
+            .click('@backupBtn')
+            .submitDialog('@authAdminDialog')
+            .waitForElementVisible('@backupDialog', 1000)
+            .submitDialog('@backupDialog')
+            .assert.containsText('@backupDBResultField',"File name for backup wasn't specified")
+        ;
 
         browser.end();
+
 
         //browser.execute(function () {
         //    browser.querySelector('#create_db_btn').click()

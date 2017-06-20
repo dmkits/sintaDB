@@ -116,8 +116,6 @@
     </tr>
 </table>
 
-<div id="adminAuthDialog"></div>
-
 </body>
 <script type="text/javascript">
     require(["app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dojo/data/ItemFileReadStore",
@@ -180,6 +178,7 @@
                     title: "Rewrite Database?"
                 }, "rewriteDBDialog");
 
+
                 createDBBtn.onClick=function() {            console.log("createDBBtn.onClick");
                     adminAuthDialog.action="createDB";
                     adminAuthDialog.show();
@@ -209,8 +208,19 @@
                    // if(adminAuthDialog.action=="restoreDB") restoreDataBase(restoreDialog);
                     adminAuthDialog.hide();
                 };
+
+//                adminAuthDialog.onBlur=function(){      console.log("adminAuthDialog.onBlur");
+//                    document.getElementById('admin_password').value='';
+//                };
+
                 backupDialog.onExecute = function () {
                     backupFilename = document.getElementById("backup_fileName").value;
+                    if(backupFilename.length<1){
+                        document.getElementById("backup_db_result").innerHTML = "<b style='color:red'> File name for backup wasn't specified </b>";
+                        document.getElementById('admin_password').value='';
+                        backupDialog.hide();
+                        return;
+                    }
                     backupDataBase();
                     backupDialog.hide();
                 };
