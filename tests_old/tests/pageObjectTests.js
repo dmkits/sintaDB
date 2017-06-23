@@ -1,17 +1,22 @@
 
 module.exports= {
     'Sysadmin Header Tests': function (browser) {
+
+        browser.element('link Text selector', 'PORT', function(res) {
+            console.log(res)
+        });
+
         var mainHeader = browser.page.sysadminHeader();
-
-        mainHeader
-            .findDojoStdDialog({title:'Title',content:'lsdfmklsdmfklmds'}).assertVisible()
-            .findDojoButtonWithText('Login').assertEnabled().assertVisible().click()
-
         //var paramsPage = browser.page.startUpParams();
         //paramsPage.resetDBConfig();
         mainHeader.navigate()
-            .waitForElementVisible('body', 1000)
-            .assert.visible("@img")
+            .waitForElementVisible('body', 1000);
+
+        browser.element('link Text selector', 'PORT', function(res) {
+            console.log(res)
+        });
+
+        mainHeader.assert.visible("@img")
             .assert.title('sinta')
             .assert.containsText('@mode', "MODE:test")
             .assert.containsText('@port', "PORT:8080")
