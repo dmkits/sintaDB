@@ -157,26 +157,41 @@
                     content: adminAuthTable,
                     title: "Admin authorisation"
                 }, "adminAuthDialog");
+                adminAuthDialog.set("buttonOk","Login");
+                adminAuthDialog.set("buttonCancel","Cancel");
+
+
                 var backupDialog = new ConfirmDialog({
                     id: "backupDialog",
                     content: backupDialogTable,
                     title: "Save backup as"
                 }, "backupDialog");
+                backupDialog.set("buttonOk", "Create");
+                backupDialog.set("buttonCancel", "Cancel");
+
                 var rewriteBackupDialog = new ConfirmDialog({
                     id: "rewriteBackupDialog",
                     content: "File exists!\n Rewrite file?",
                     title: "Rewrite file?"
                 }, "rewriteBackupDialog");
+                rewriteBackupDialog.set("buttonOk", "Rewrite");
+                rewriteBackupDialog.set("buttonCancel", "Cancel");
+
                 var restoreDialog = new ConfirmDialog({
                     id: "restoreDialog",
                     content: restoreDialogTable,
                     title: "Restore from file"
                 }, "restoreDialog");
+                restoreDialog.set("buttonOk", "Restore");
+                restoreDialog.set("buttonCancel", "Cancel");
+
                 var rewriteDBDialog = new ConfirmDialog({
                     id: "rewriteDBDialog",
                     content: "Database contains data!\n Rewrite Database?",
                     title: "Rewrite Database?"
                 }, "rewriteDBDialog");
+                rewriteDBDialog.set("buttonOk", "Rewrite");
+                rewriteDBDialog.set("buttonCancel", "Cancel");
 
 
                 createDBBtn.onClick=function() {            console.log("createDBBtn.onClick");
@@ -208,14 +223,11 @@
                    // if(adminAuthDialog.action=="restoreDB") restoreDataBase(restoreDialog);
                     adminAuthDialog.hide();
                 };
-
-//                adminAuthDialog.onBlur=function(){      console.log("adminAuthDialog.onBlur");
-//                    document.getElementById('admin_password').value='';
-//                };
-
+                
                 backupDialog.onExecute = function () {
                     backupFilename = document.getElementById("backup_fileName").value;
                     if(backupFilename.length<1){
+                        cleanResultFields();
                         document.getElementById("backup_db_result").innerHTML = "<b style='color:red'> File name for backup wasn't specified </b>";
                         document.getElementById('admin_password').value='';
                         backupDialog.hide();
@@ -465,6 +477,7 @@
                             function (success, data) {
                                 document.getElementById("admin_password").value="";
                                 document.getElementById("backup_fileName").value="";
+                                document.getElementById("restore_fileName").value="";
                                 console.log("data=", data);
                                 if (!success) {
                                     sa_startup_params_appLocalConfig.innerHTML = "<div><b style='color:red'>No connection!</b></div>";

@@ -1,6 +1,11 @@
-module.exports={
-    'Sysadmin Header Tests':function(browser){
-       var mainHeader=browser.page.sysadminHeader();
+
+module.exports= {
+    'Sysadmin Header Tests': function (browser) {
+        var mainHeader = browser.page.sysadminHeader();
+
+        mainHeader
+            .findDojoStdDialog({title:'Title',content:'lsdfmklsdmfklmds'}).assertVisible()
+            .findDojoButtonWithText('Login').assertEnabled().assertVisible().click()
 
         //var paramsPage = browser.page.startUpParams();
         //paramsPage.resetDBConfig();
@@ -15,6 +20,7 @@ module.exports={
             .assert.containsText('@dbConnectionState', 'Connected')
             .assert.visible('@StartUpParamsBtn')
             .click('@StartUpParamsBtn');
+        browser.pause(2000);
     },
     //'Sysadmin Startup params Tests': function (browser) {
     //    var paramsPage = browser.page.startUpParams();
@@ -31,7 +37,6 @@ module.exports={
     //        })
     //        .waitForElementVisible('@dbHost', 2000)
     //        .clearValue('@dbHost', function () {
-    //          //  paramsPage.assert.valueContains('@dbHost', '')
     //              paramsPage.setValue('@dbHost', '192.168.0.93_false', function () {
     //                    var mainHeader=browser.page.sysadminHeader();
     //                    paramsPage
@@ -95,72 +100,134 @@ module.exports={
     //    .resetDBConfig();
     //
     //},
-    'DB Actions Tests': function (browser) {
+    'DB Empty Admin Values': function (browser) {
         var DBActions = browser.page.DBActions();
         DBActions
             .waitForElementPresent('@createDBBtn', 1000)
             .assert.visible('@createDBBtn')
-            .moveToElement('@createDBBtn', 5,5)
             .click('@createDBBtn')
-            .waitForElementPresent('@authAdminDialog', 6000)
-           // .assert.visible('@authAdminDialog')
-            .assert.containsText('@authAdminDialog','Admin authorisation')
-           // .waitForElementPresent('@authAdminName', 6000)
-            .assert.visible('@authAdminName')
-            .assert.valueContains('@authAdminName','root')
-           // .waitForElementVisible('@authAdminPas', 6000)
-            .assert.visible('@authAdminPas')
-            .assert.valueContains('@authAdminPas','')
             .submitDialog('@authAdminDialog')
             .waitForElementVisible('@createDBResultField', 1000)
-            .assert.containsText('@createDBResultField','ACCESS_DENIED_ERROR')
-            .click('@createDBBtn')
-            .authorizeAsAdmin()
-            .assert.containsText('@createDBResultField','Impossible to create DB!')
+            .assert.containsText('@createDBResultField', 'ACCESS_DENIED_ERROR')
 
             .waitForElementVisible('@dropDBBtn', 1000)
             .click('@dropDBBtn')
             .submitDialog('@authAdminDialog')
-            .assert.containsText('@dropDBResultField','ACCESS_DENIED_ERROR')
+            .assert.containsText('@dropDBResultField', 'ACCESS_DENIED_ERROR')
 
             .waitForElementVisible('@backupBtn', 1000)
             .click('@backupBtn')
             .submitDialog('@authAdminDialog')
             .waitForElementVisible('@backupDialog', 1000)
             .submitDialog('@backupDialog')
-            .assert.containsText('@backupDBResultField',"File name for backup wasn't specified")
+            .assert.containsText('@backupDBResultField', "File name for backup wasn't specified")
+
+            .click('@restoreBtn')
+            .submitDialog('@authAdminDialog')
+            .assert.visible('@restoreDialog')
+            .submitDialog('@restoreDialog')
+            .assert.containsText('@restoreDBResultField', "ACCESS_DENIED_ERROR")
         ;
 
+    },
+    'DB Button Actions Tests': function (browser) {
+
+        var DBActions = browser.page.DBActions();
+        var header = browser.page.sysadminHeader();
+        DBActions
+            .waitForElementPresent('@dropDBBtn', 1000)
+            .click('@dropDBBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@dropDBResultField', 1000)
+            .assert.containsText('@dropDBResultField', 'dropped!');
+        header
+            .assert.containsText('@dbConnectionState', 'Failed to connect to database!');
+
+        DBActions.click('@backupBtn')
+            .authorizeAsAdmin()
+            .assert.visible("@backupDialog")
+            .assert.visible("@backupFileName")
+            .setValue("@backupFileName","sinta")
+            .submitDialog('@backupDialog')
+            .waitForElementVisible('@backupDBResultField', 1000)
+            .assert.visible("@backupDBResultField")
+            .assert.containsText('@backupDBResultField', 'FAIL!')
+
+            .click('@restoreBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@restoreDialog', 1000)
+            .clearValue("@restoreFileName")
+            .setValue("@restoreFileName","sinta")
+            .submitDialog('@restoreDialog')
+            .waitForElementVisible('@restoreDBResultField', 1000)
+            .assert.visible("@restoreDBResultField")
+            .assert.containsText('@restoreDBResultField', 'FAIL!')
+
+            .click('@createDBBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@createDBResultField', 1000)
+            .assert.containsText('@createDBResultField', 'Database created!');
+        header
+            .assert.containsText('@dbConnectionState', 'Connected');
+
+        DBActions.click('@restoreBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@restoreDialog', 1000)
+            .clearValue("@restoreFileName")
+            .setValue("@restoreFileName","sinta")
+            .submitDialog('@restoreDialog')
+            .waitForElementVisible('@restoreDBResultField', 5000)
+            .assert.containsText('@restoreDBResultField', 'Db dump file restored successfully')
+
+            .click('@restoreBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@restoreDialog', 1000)
+            .clearValue("@restoreFileName")
+            .setValue("@restoreFileName","sinta")
+            .submitDialog('@restoreDialog')
+            .waitForElementVisible('@rewriteDBDialog', 5000)
+            .submitDialog('@rewriteDBDialog')
+            .waitForElementVisible('@restoreDBResultField', 5000)
+            .assert.containsText('@restoreDBResultField', 'Db dump file restored successfully')
+
+
+            .click('@restoreBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@restoreDialog', 1000)
+            .clearValue("@restoreFileName")
+            .setValue("@restoreFileName","fail0000")
+            .submitDialog('@restoreDialog')
+            //.waitForElementVisible('@rewriteDBDialog', 5000)
+            //.submitDialog('@rewriteDBDialog')
+            .waitForElementVisible('@restoreDBResultField', 5000)
+            .assert.containsText('@restoreDBResultField', 'FAIL!')
+
+            .waitForElementVisible('@backupBtn', 1000)
+            .click('@backupBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@backupDialog', 1000)
+            .clearValue("@backupFileName")
+            .setValue("@backupFileName","backup"+Math.floor(Math.random()*10000))
+            .submitDialog('@backupDialog')
+            .waitForElementVisible('@backupDBResultField', 10000)
+            .assert.containsText('@backupDBResultField', 'backup saved')
+
+            .waitForElementVisible('@backupBtn', 1000)
+            .click('@backupBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@backupDialog', 1000)
+            .clearValue("@backupFileName")
+            .setValue("@backupFileName","backup")
+            .submitDialog('@backupDialog')
+            .waitForElementVisible('@rewriteBackupDialog', 10000)
+            .submitDialog('@rewriteBackupDialog')
+            .waitForElementVisible('@backupDBResultField', 5000)
+            .assert.containsText('@backupDBResultField', 'backup saved')
+
+
+            .click('@createDBBtn')
+            .authorizeAsAdmin()
+        ;
         browser.end();
-
-
-        //browser.execute(function () {
-        //    browser.querySelector('#create_db_btn').click()
-        //});
-        //DBActions
-
-           //
-           //     DBActions.elementIdClick('@createDBBtn', function (){
-           //         DBActions.waitForElementVisible('@authAdminDialog', 6000,false, function(){
-           //             browser.end();
-           //         });
-           //     });
-           // });
-           //// .click('@createDBBtn', function () {
-           //     var DBActions = browser.page.DBActions();
-           //     DBActions.waitForElementVisible('@authAdminDialog', 6000);
-                //.assert.value('@authAdminName', 'root')
-                //.assert.value('@authAdminPas', '');
-
-                //this.waitForElementVisible('@authAdminName', 1000);
-              //  this.assert.value('@authAdminName', 'root');
-              //  browser.end();
-          //  });
-        //.waitForElementVisible('@authAdminDialog', 2000)
-        //.assert.value('@authAdminName', 'root')
-        //.assert.value('@authAdminPas', '');
-
-
     }
-
 };

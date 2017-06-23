@@ -34,7 +34,7 @@ module.exports={
     commands:[startUpParamsCommands],
     elements:{
         dbHost:'input[id="db.host"]',
-        //dbPort:'input[id="db.port"]',
+       // dbPort:'input[id="db.port"]',
         dbName:'input[id="db.name"]',
         dbUser:'input[id="db.user"]',
         dbPassword:'input[id="db.password"]',
