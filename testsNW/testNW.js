@@ -7,6 +7,10 @@ module.exports= {
         this.browser= browser;
         return this;
     },
+    browser: function(browser){
+        this.browser= browser;
+        return this;
+    },
     /*
      * params = { title, content }
      */
@@ -41,25 +45,49 @@ module.exports= {
             //.expect.element(pathToElement).to.be.visible;
         return this;
     },
-    assertElementContainsValue: function(params) {
-       // var pathToElement=getXpath(params);
-
+    assertInputContainsValue: function(value) {
         this.browser
             .useXpath()
-       //.elements('xpath', 'input', function(res) {
-       //     console.log("assertElementContainsValue res=",res)
-       // });
-           // .waitForElementVisible("//*input[@value='localhost']",1000)
-            .waitForElementVisible("//input[contains(value(), 'localhost')]",1000);
+            .waitForElementVisible("//input[@value=\""+value+"\"]",1000);
+          //  .waitForElementVisible("//input[contains(value(), \"localhost\")]",1000);
            // .assert.visible("//*input[@value='localhost']");
           // .expect.element(pathToElement).to.have.attribute('value').equals(params.value);
         return this;
     },
 
+    enterPasswordToInput:function(password){
+        var xpathStr="//input[@type=\"password\"]";
+        this.browser
+            .useXpath()
+            //.elements('xpath', 'input', function(res) {
+            //     console.log("assertElementContainsValue res=",res)
+            // });
+            .waitForElementVisible(xpathStr,1000)
+            .clearValue(xpathStr)
+            .setValue(xpathStr,password);
+        // .waitForElementVisible("//input[contains(value(), 'root')]",1000);
+        // .assert.visible("//*input[@value='localhost']");
+        // .expect.element(pathToElement).to.have.attribute('value').equals(params.value);
+        return this;
+    },
+
+    setInputValue: function(params) {
+        // var pathToElement=getXpath(params);
+
+        this.browser
+            .useXpath()
+            //.elements('xpath', 'input', function(res) {
+            //     console.log("assertElementContainsValue res=",res)
+            // });
+            .waitForElementVisible("//input[@type=\"password\"]",1000);
+        // .waitForElementVisible("//input[contains(value(), 'root')]",1000);
+        // .assert.visible("//*input[@value='localhost']");
+        // .expect.element(pathToElement).to.have.attribute('value').equals(params.value);
+        return this;
+    },
 
     clickDojoButton: function(params){
         var pathToElement=getXpath(params);
-
         this.browser
             .useXpath()
             .waitForElementVisible(pathToElement,1000)
@@ -70,8 +98,6 @@ module.exports= {
     },
     checkDojoToggleButtonSelected: function(params){
         var pathToElement=getXpath(params)+"/..";
-       // var pathToElement=getParentNode(params);
-
         this.browser
             .pause(1000)
             .useXpath()
