@@ -12,9 +12,6 @@ module.exports= {
         mainHeader.navigate()
             .waitForElementVisible('body', 1000);
 
-        browser.element('link Text selector', 'PORT', function(res) {
-            console.log(res)
-        });
 
         mainHeader.assert.visible("@img")
             .assert.title('sinta')

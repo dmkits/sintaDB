@@ -7,13 +7,21 @@ module.exports= {
         this.browser= browser;
         return this;
     },
-    browser: function(browser){
-        this.browser= browser;
+    clearInputValueById:function(id){
+        this.browser
+            .waitForElementVisible(id,3000)
+            .clearValue(id);
         return this;
     },
-    /*
-     * params = { title, content }
-     */
+    setInputValueById:function(id, value){
+        this.browser
+            .waitForElementVisible(id,3000)
+            .setValue(id, value);
+        return this;
+    },
+/*
+ * params = { title, content }
+ */
     findDojoStdDialog: function(params){
        // this.browser.pause(5000);
        // var dlg= this.browser.element('link text', 'PORT', function(res) {
@@ -40,7 +48,7 @@ module.exports= {
 
         this.browser
             .useXpath()
-            .waitForElementVisible(pathToElement,1000)
+            .waitForElementVisible(pathToElement,3000)
             .assert.visible(pathToElement);
             //.expect.element(pathToElement).to.be.visible;
         return this;
@@ -71,20 +79,6 @@ module.exports= {
         return this;
     },
 
-    setInputValue: function(params) {
-        // var pathToElement=getXpath(params);
-
-        this.browser
-            .useXpath()
-            //.elements('xpath', 'input', function(res) {
-            //     console.log("assertElementContainsValue res=",res)
-            // });
-            .waitForElementVisible("//input[@type=\"password\"]",1000);
-        // .waitForElementVisible("//input[contains(value(), 'root')]",1000);
-        // .assert.visible("//*input[@value='localhost']");
-        // .expect.element(pathToElement).to.have.attribute('value').equals(params.value);
-        return this;
-    },
 
     clickDojoButton: function(params){
         var pathToElement=getXpath(params);
@@ -96,6 +90,20 @@ module.exports= {
             .click(pathToElement);
         return this;
     },
+
+    clickDojoRestoreButton:function(path){
+        this.browser
+            .click(path);
+        return this;
+    },
+    assertElementPresent:function(path){
+        this.browser
+            .useXpath()
+            .waitForElementPresent(path,5000)
+           // .waitForElementVisible(path,7000);
+        ;return this;
+    },
+
     checkDojoToggleButtonSelected: function(params){
         var pathToElement=getXpath(params)+"/..";
         this.browser
