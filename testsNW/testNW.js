@@ -48,7 +48,7 @@ module.exports= {
 
         this.browser
             .useXpath()
-            .waitForElementVisible(pathToElement,3000)
+            .waitForElementVisible(pathToElement,6000)
             .assert.visible(pathToElement);
             //.expect.element(pathToElement).to.be.visible;
         return this;
@@ -115,7 +115,8 @@ module.exports= {
 };
 function getXpath(params) {
     var xpathStr = "";
-    if (params.parentClass)xpathStr = "//*[@class=\"" + xpathStr + params.parentClass + "\"]";
+    if (params.parentClass)xpathStr = "//*[@class=\"" +  params.parentClass + "\"]";
+    //if (params.parentClass)xpathStr = "//*[class=\"" + params.parentClass + "\"]";
     if (params.tag) {
         xpathStr = xpathStr + "//" + params.tag
     } else {

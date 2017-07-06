@@ -23,7 +23,8 @@
 
     <title>sinta</title>
 </head>
-<body class="claro">
+<body class="claro" style="display: none" id="hideAll">
+<!--<div style="display: none" id="hideAll">-->
 <div id="sysadmin_MainContainer">
     <div id="sysadmin_TopContainer">
         <div id="sysadmin_TopImg"></div>
@@ -43,12 +44,15 @@
     </div>
     <div id="sysadmin_ContentContainer"></div>
 </div>
+<!--</div>-->
 </body>
 <script type="text/javascript">
     require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
                 "dijit/form/ToggleButton", "dojox/layout/ContentPane", "dijit/form/Button",  "request", "dojo/domReady!"],
             function (APP, BorderContainer, StackContainer, ContentPane, ToggleButton, XContentPane, Button, Request) {                    console.log("STARTING SYSADMIN PAGE...");//!!!IT'S FOR TESTING!!!
                moment.locale("uk");
+
+                document.getElementById("hideAll").style.display = "inline";
 
                 var sysadmin_MainContainer = APP.instanceForID("sysadmin_MainContainer", BorderContainer, {design: "headline"});
                 var sysadmin_TopContainer = APP.instanceForID("sysadmin_TopContainer",
