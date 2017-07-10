@@ -1,5 +1,27 @@
 
+var fs=require('fs');
+
+function deleteTestBackUpFile() {
+
+    fs.unlink('./backups/testBackup.sql', function (err) {
+        if (err && err.code == 'ENOENT') {
+            // file doens't exist
+            console.info("File doesn't exist, won't remove it.");
+        } else if (err) {
+            // maybe we don't have enough permission
+            console.error("Error occurred while trying to remove file");
+        } else {
+            console.info('File "testBackup.sql" removed');
+        }
+    });
+}
+
 module.exports= {
+
+    after : function(browser) {
+        deleteTestBackUpFile();
+    },
+
     'Sysadmin Header If  All Elements Visible Tests': function (browser) {
 
         var mainHeader = browser.page.sysadminHeader();
@@ -18,91 +40,93 @@ module.exports= {
             .assert.attributeContains('@StartUpParamsBtn','aria-pressed','true');
     },
 
-    //'Sysadmin Startup DB params Tests': function (browser) {
-    //
-    //    var startUpParams = browser.page.startUpParams();
-    //    var mainHeader = browser.page.sysadminHeader();
-    //
-    //    startUpParams
-    //        .waitForElementVisible('@dbHostLabel')
-    //        .assert.containsText('@dbHostLabel','db.host')
-    //        .waitForElementVisible('@dbNameLabel')
-    //        .assert.containsText('@dbNameLabel','db.name')
-    //        .waitForElementVisible('@dbUserLabel')
-    //        .assert.containsText('@dbUserLabel','db.user')
-    //        .waitForElementVisible('@dbPasswordLabel')
-    //        .assert.containsText('@dbPasswordLabel','db.password')
-    //
-    //        .waitForElementVisible('@dbHostInput')
-    //        .assert.valueContains('@dbHostInput','localhost')
-    //        .waitForElementVisible('@dbNameInput')
-    //        .assert.valueContains('@dbNameInput','sample_sinta')
-    //        .waitForElementVisible('@dbUserInput')
-    //        .assert.valueContains('@dbUserInput','user')
-    //        .waitForElementVisible('@dbPasswordInput')
-    //        .assert.valueContains('@dbPasswordInput','user')
-    //
-    //        .waitForElementVisible('@localConfigInfo')
-    //        .assert.containsText('@localConfigInfo', "Configuration loaded.")
-    //        .click('@loadSettingsBtn')
-    //        .assert.containsText('@localConfigInfo', "Configuration reloaded.")
-    //        .waitForElementVisible('@dbHostInput')
-    //        .clearValue('@dbHostInput')
-    //        .setValue('@dbHostInput', '192.168.0.93_false')
-    //        .click('@StoreAndReconnectBtn')
-    //        .waitForElementVisible('@localConfigInfo')
-    //        .assert.containsText('@localConfigInfo', "Configuration sav")
-    //        .assert.containsText('@localConfigInfo', "Failed to connect to database!");
-    //
-    //    mainHeader.waitForElementVisible('@dbConnectionState')
-    //        .assert.containsText("@dbConnectionState", "Failed to connect to database!");
-    //
-    //    startUpParams
-    //        .resetDBConfig()
-    //        .waitForElementVisible('@dbNameInput')
-    //        .clearValue('@dbNameInput')
-    //        .setValue('@dbNameInput', 'GMSSample38xml_false')
-    //        .click('@StoreAndReconnectBtn')
-    //        .waitForElementVisible('@localConfigInfo')
-    //        .assert.containsText('@localConfigInfo', "Configuration sav")
-    //        .assert.containsText('@localConfigInfo', "Failed to connect to database!");
-    //
-    //    mainHeader.waitForElementVisible('@dbName')
-    //        .assert.containsText("@dbName", "GMSSample38xml_false")
-    //        .waitForElementVisible('@dbConnectionState')
-    //        .assert.containsText("@dbConnectionState", "Failed to connect to database!");
-    //
-    //    startUpParams
-    //        .resetDBConfig()
-    //        .waitForElementVisible('@dbUserInput')
-    //        .clearValue('@dbUserInput')
-    //        .setValue('@dbUserInput','sa1')
-    //        .click('@StoreAndReconnectBtn');
-    //
-    //    mainHeader.waitForElementVisible('@user')
-    //        .assert.containsText("@user", "sa1")
-    //        .waitForElementVisible('@dbConnectionState')
-    //        .assert.containsText("@dbConnectionState", "Failed to connect to database!");
-    //
-    //    startUpParams.resetDBConfig()
-    //        .waitForElementVisible('@dbPasswordInput')
-    //        .clearValue('@dbPasswordInput')
-    //        .setValue('@dbPasswordInput','false')
-    //        .click('@StoreAndReconnectBtn');
-    //
-    //    mainHeader
-    //        .waitForElementVisible('@dbConnectionState')
-    //        .assert.containsText("@dbConnectionState", "Failed to connect to database!");
-    //
-    //    startUpParams
-    //        .resetDBConfig();
-    //},
+    'Sysadmin Startup DB params Tests': function (browser) {
+
+        var startUpParams = browser.page.startUpParams();
+        var mainHeader = browser.page.sysadminHeader();
+
+        startUpParams
+            .waitForElementVisible('@dbHostLabel')
+            .assert.containsText('@dbHostLabel','db.host')
+            .waitForElementVisible('@dbNameLabel')
+            .assert.containsText('@dbNameLabel','db.name')
+            .waitForElementVisible('@dbUserLabel')
+            .assert.containsText('@dbUserLabel','db.user')
+            .waitForElementVisible('@dbPasswordLabel')
+            .assert.containsText('@dbPasswordLabel','db.password')
+
+            .waitForElementVisible('@dbHostInput')
+            .assert.valueContains('@dbHostInput','localhost')
+            .waitForElementVisible('@dbNameInput')
+            .assert.valueContains('@dbNameInput','sample_sinta')
+            .waitForElementVisible('@dbUserInput')
+            .assert.valueContains('@dbUserInput','user')
+            .waitForElementVisible('@dbPasswordInput')
+            .assert.valueContains('@dbPasswordInput','user')
+
+            .waitForElementVisible('@localConfigInfo')
+            .assert.containsText('@localConfigInfo', "Configuration loaded.")
+            .click('@loadSettingsBtn')
+            .assert.containsText('@localConfigInfo', "Configuration reloaded.")
+            .waitForElementVisible('@dbHostInput')
+            .clearValue('@dbHostInput')
+            .setValue('@dbHostInput', '192.168.0.93_false')
+            .click('@StoreAndReconnectBtn')
+            .waitForElementVisible('@localConfigInfo')
+            .assert.containsText('@localConfigInfo', "Configuration sav")
+            .assert.containsText('@localConfigInfo', "Failed to connect to database!");
+
+        mainHeader.waitForElementVisible('@dbConnectionState')
+            .assert.containsText("@dbConnectionState", "Failed to connect to database!");
+
+        startUpParams
+            .resetDBConfig()
+            .waitForElementVisible('@dbNameInput')
+            .clearValue('@dbNameInput')
+            .setValue('@dbNameInput', 'GMSSample38xml_false')
+            .click('@StoreAndReconnectBtn')
+            .waitForElementVisible('@localConfigInfo')
+            .assert.containsText('@localConfigInfo', "Configuration sav")
+            .assert.containsText('@localConfigInfo', "Failed to connect to database!");
+
+        mainHeader.waitForElementVisible('@dbName')
+            .assert.containsText("@dbName", "GMSSample38xml_false")
+            .waitForElementVisible('@dbConnectionState')
+            .assert.containsText("@dbConnectionState", "Failed to connect to database!");
+
+        startUpParams
+            .resetDBConfig()
+            .waitForElementVisible('@dbUserInput')
+            .clearValue('@dbUserInput')
+            .setValue('@dbUserInput','sa1')
+            .click('@StoreAndReconnectBtn');
+
+        mainHeader.waitForElementVisible('@user')
+            .assert.containsText("@user", "sa1")
+            .waitForElementVisible('@dbConnectionState')
+            .assert.containsText("@dbConnectionState", "Failed to connect to database!");
+
+        startUpParams.resetDBConfig()
+            .waitForElementVisible('@dbPasswordInput')
+            .clearValue('@dbPasswordInput')
+            .setValue('@dbPasswordInput','false')
+            .click('@StoreAndReconnectBtn');
+
+        mainHeader
+            .waitForElementVisible('@dbConnectionState')
+            .assert.containsText("@dbConnectionState", "Failed to connect to database!");
+
+        startUpParams
+            .resetDBConfig();
+    },
 
     'Empty  Dialog Values': function (browser) {
         var startUpParams = browser.page.startUpParams();
         startUpParams
             .waitForElementVisible('@dropDBBtn')
             .click('@dropDBBtn')
+            .waitForElementVisible('@authAdminDialog')
+            .assertAdminDialogIsEmpty()
             .submitDialog('@authAdminDialog')
             .assert.containsText('@dropDBResultField', 'ACCESS_DENIED_ERROR')
 
@@ -113,16 +137,15 @@ module.exports= {
 
             .waitForElementVisible('@backupBtn')
             .click('@backupBtn')
+            .assertAdminDialogIsEmpty()
             .submitDialog('@authAdminDialog')
-            .waitForElementVisible('@backupDialog')
-            .submitDialog('@backupDialog')
-            .assert.containsText('@backupDBResultField', "File name for backup wasn't specified")
+            .assert.containsText('@backupDBResultField', 'ACCESS_DENIED_ERROR')
 
+            .waitForElementVisible('@restoreBtn')
             .click('@restoreBtn')
+            .assertAdminDialogIsEmpty()
             .submitDialog('@authAdminDialog')
-            .assert.visible('@restoreDialog')
-            .submitDialog('@restoreDialog')
-            .assert.containsText('@restoreDBResultField', "ACCESS_DENIED_ERROR")
+            .assert.containsText('@restoreDBResultField', 'ACCESS_DENIED_ERROR')
         ;
     },
 
@@ -135,20 +158,14 @@ module.exports= {
             .waitForElementVisible('@createDBBtn')
             .assert.visible('@createDBBtn')
             .click('@createDBBtn')
-            .submitDialog('@authAdminDialog')
-            .waitForElementVisible('@createDBResultField')
-            .assert.containsText('@createDBResultField', 'ACCESS_DENIED_ERROR')
-
-            .waitForElementVisible('@createDBBtn')
-            .assert.visible('@createDBBtn')
-            .click('@createDBBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@createDBResultField')
             .assert.containsText('@createDBResultField', 'Impossible to create DB!')
 
-
             .waitForElementPresent('@dropDBBtn')
             .click('@dropDBBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@dropDBResultField')
             .assert.containsText('@dropDBResultField', 'dropped!');
@@ -156,6 +173,7 @@ module.exports= {
             .assert.containsText('@dbConnectionState', 'Failed to connect to database!');
 
         startUpParams.click('@backupBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .assert.visible("@backupDialog")
             .assert.visible("@backupFileName")
@@ -165,7 +183,9 @@ module.exports= {
             .assert.visible("@backupDBResultField")
             .assert.containsText('@backupDBResultField', 'FAIL!')
 
+
             .click('@restoreBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
             .clearValue("@restoreFileName")
@@ -176,6 +196,7 @@ module.exports= {
             .assert.containsText('@restoreDBResultField', 'FAIL!')
 
             .click('@createDBBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@createDBResultField')
             .assert.containsText('@createDBResultField', 'Database created!');
@@ -183,6 +204,7 @@ module.exports= {
             .assert.containsText('@dbConnectionState', 'Connected');
 
         startUpParams.click('@restoreBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
             .clearValue("@restoreFileName")
@@ -192,6 +214,7 @@ module.exports= {
             .assert.containsText('@restoreDBResultField', 'Db dump file restored successfully')
 
             .click('@restoreBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
             .clearValue("@restoreFileName")
@@ -203,6 +226,7 @@ module.exports= {
             .assert.containsText('@restoreDBResultField', 'Db dump file restored successfully')
 
             .click('@restoreBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
             .clearValue("@restoreFileName")
@@ -213,26 +237,28 @@ module.exports= {
 
             .waitForElementVisible('@backupBtn')
             .click('@backupBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
             .clearValue("@backupFileName")
-            .setValue("@backupFileName","backup"+Math.floor(Math.random()*10000))
+            .setValue("@backupFileName","testBackup")
             .submitDialog('@backupDialog')
             .waitForElementVisible('@backupDBResultField', 10000)
             .assert.containsText('@backupDBResultField', 'backup saved')
 
             .waitForElementVisible('@backupBtn')
             .click('@backupBtn')
+            .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
             .clearValue("@backupFileName")
-            .setValue("@backupFileName","backup")
+            .setValue("@backupFileName","sinta")
             .submitDialog('@backupDialog')
             .waitForElementVisible('@rewriteBackupDialog', 10000)
             .submitDialog('@rewriteBackupDialog')
             .waitForElementVisible('@backupDBResultField')
-            .assert.containsText('@backupDBResultField', 'backup saved')
-
-        ;browser.end();
+            .assert.containsText('@backupDBResultField', 'backup saved');
+        browser.end();
     }
+
 };

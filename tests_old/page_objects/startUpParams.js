@@ -28,6 +28,15 @@ var startUpParamsCommands = {
             .click(dialog+'_cancelBtn')
             .waitForElementNotVisible(dialog);
     },
+
+    assertAdminDialogIsEmpty:function(){
+        var instance=this;
+        return instance.waitForElementVisible('@authAdminDialog')
+            .waitForElementVisible('@authAdminDialog_AdminName')
+            .assert.valueContains('@authAdminDialog_AdminName', 'root')
+            .waitForElementVisible('@authAdminDialog')
+            .assert.valueContains('@authAdminDialog_AdminPas', '')
+    },
     authorizeAsAdmin:function(){
         var instance=this;
         return instance.waitForElementVisible('@authAdminDialog')
@@ -39,8 +48,21 @@ var startUpParamsCommands = {
             .setValue('@authAdminDialog_AdminPas','Rty1988')
             .click('@authAdminDialog_submitBtn')
             .waitForElementNotVisible('@authAdminDialog');
+    },
+    assertBackupDialogIsEmpty:function(){
+        var instance=this;
+        return instance.waitForElementVisible('@backupDialog')
+            .waitForElementVisible('@backupFileName')
+            .assert.valueContains('@backupFileName', '')
+    },
+    assertRestoreDialogIsEmpty:function(){
+        var instance=this;
+        return instance.waitForElementVisible('@restoreDialog')
+            .waitForElementVisible('@restoreFileName')
+            .assert.valueContains('@restoreFileName', '')
     }
 };
+
 
 module.exports={
     commands:[startUpParamsCommands],

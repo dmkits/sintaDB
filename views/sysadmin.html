@@ -117,6 +117,10 @@
                                                 "<b>USER:<span style='color:dimgrey'>" + result.configuration.user + "</span></b>"
                                     }
                                     if (result.dbConnection) {
+                                        sysadmin_TopContainer.set("style","height:63px; margin:0; padding:0");
+                                        sysadmin_TopContainer.resize();
+                                        sysadmin_MainContainer.layout();
+
                                         document.getElementById("sysadmin_connectToDBState").innerHTML =
                                                 "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>" + result.dbConnection + "</span></b>";
 
@@ -124,6 +128,11 @@
 
                                         if (result.dbConnection != "Connected") {
                                             dbConnection_color.setAttribute("style", "color:red");
+
+                                            sysadmin_TopContainer.set("style","height:75px; margin:0; padding:0");
+                                             sysadmin_TopContainer.resize();
+                                            sysadmin_MainContainer.layout();
+
                                         }else dbConnection_color.setAttribute("style", "color:dimgrey");
                                     }
                                 } else {
@@ -151,7 +160,7 @@
                     sysadmin_ContentContainer.selectChild(owner.pageContentPane);
                 };
 
-                var checkButton= function(button){
+                var checkButton= function(button){   //console.log("checkButton  functionalButtons=", functionalButtons);
                     button.set("checked", true);
                     for(var i in functionalButtons){
                         var anotherBtn=functionalButtons[i];

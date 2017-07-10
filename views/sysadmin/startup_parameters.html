@@ -283,7 +283,7 @@
                     adminAuthDialog.hide();
                 };
                 backupDialog.onCancel=function(){
-                    document.getElementById("backup_fileName").value=0;
+                    document.getElementById("backup_fileName").value="";
                     sa_startup_params_PageContent.getAppConfiguration();
                     saveAndReconnectBtn.onClick();
                     backupDialog.hide();
@@ -295,7 +295,7 @@
                 };
 
                 restoreDialog.onCancel=function(){
-                    document.getElementById("restore_fileName").value=0;
+                    document.getElementById("restore_fileName").value="";
                     sa_startup_params_PageContent.getAppConfiguration();
                     saveAndReconnectBtn.onClick();
                     restoreDialog.hide();

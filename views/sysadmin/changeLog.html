@@ -13,7 +13,9 @@
 <script type="text/javascript">
     require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
                 "dijit/form/Button", "templateDocumentSimpleTable","request"],
+
             function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTable, Request) {
+
                 var sysadmin_changeLog_PageContainer=
                         APP.instanceForID("sysadmin_changeLog_PageContainer", BorderContainer, {});
                 var sysadmin_changeLog_ContentPaneLeft=  APP.instanceForID("sysadmin_changeLog_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
