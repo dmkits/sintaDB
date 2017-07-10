@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!--<meta http-equiv="Access-Control-Allow-Origin" content="*">-->
-    <!--<header name = "Access-Control-Allow-Origin" value = "*" />-->
-    <!--<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>-->
     <link rel="icon" type="image/gif" href="/icons/coin16x16.ico"/>
-    <!--<link rel="icon" type="image/gif" href="/icons/cashbox16x16.ico"/>-->
-    <!--[if IE]>
-    <!--<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">-->
     <![endif]-->
     <script src="/jslib/handsontable/handsontable.full.min.js"></script>
     <link rel="stylesheet" media="screen" href="/jslib/handsontable/handsontable.full.min.css">
@@ -15,16 +9,13 @@
     <script src="/jslib/numeral/languages/ru.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/jslib/moment/moment-with-locales.js"></script>
-    <!--<link rel="icon" type="image/gif" href="/icons/icon1.ico"/>-->
     <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
     <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
     <link rel="stylesheet" href="/jslib/htable.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/css/sysadmin.css" media="screen">
-
     <title>sinta</title>
 </head>
 <body class="claro" style="display: none" id="hideAll">
-<!--<div style="display: none" id="hideAll">-->
 <div id="sysadmin_MainContainer">
     <div id="sysadmin_TopContainer">
         <div id="sysadmin_TopImg"></div>
@@ -39,17 +30,15 @@
         <div id="sysadmin_TopActions">
             <button id="display_startup_params">Startup params</button>
             <button id="btnChangeLog">Change Log</button>
-            <!--<button id="btnDB_admin">DB admin</button>-->
         </div>
     </div>
     <div id="sysadmin_ContentContainer"></div>
 </div>
-<!--</div>-->
 </body>
 <script type="text/javascript">
     require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
                 "dijit/form/ToggleButton", "dojox/layout/ContentPane", "dijit/form/Button",  "request", "dojo/domReady!"],
-            function (APP, BorderContainer, StackContainer, ContentPane, ToggleButton, XContentPane, Button, Request) {                    console.log("STARTING SYSADMIN PAGE...");//!!!IT'S FOR TESTING!!!
+            function (APP, BorderContainer, StackContainer, ContentPane, ToggleButton, XContentPane, Button, Request) {     console.log("STARTING SYSADMIN PAGE...");//!!!IT'S FOR TESTING!!!
                moment.locale("uk");
 
                 document.getElementById("hideAll").style.display = "inline";
@@ -82,8 +71,6 @@
                 functionalButtons.push(startupBtn);
                 var btnChangeLog = new ToggleButton({id:"btnChangeLog",iconClass:'dijitCheckBoxIcon'},"btnChangeLog");
                 functionalButtons.push(btnChangeLog);
-//                var btnDB_admin = new ToggleButton({id:"btnDB_admin",iconClass:'dijitCheckBoxIcon'},"btnDB_admin");
-//                functionalButtons.push(btnDB_admin);
 
                 var sysadmin_ContentContainer = APP.instanceForID("sysadmin_ContentContainer",
                         StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
@@ -160,7 +147,7 @@
                     sysadmin_ContentContainer.selectChild(owner.pageContentPane);
                 };
 
-                var checkButton= function(button){   //console.log("checkButton  functionalButtons=", functionalButtons);
+                var checkButton= function(button){
                     button.set("checked", true);
                     for(var i in functionalButtons){
                         var anotherBtn=functionalButtons[i];
@@ -179,10 +166,7 @@
                     sysadmin_MainContainer.runSysadminContentPage(btnChangeLog, "btnChangeLog", "Change Log", false, "/sysadmin/changeLog");
                     checkButton(this);
                 };
-//                btnDB_admin.onClick=function(){
-//                    sysadmin_MainContainer.runSysadminContentPage(btnDB_admin, "btnDB_admin", "DB admin", false, "/sysadmin/DBadmin");
-//                    checkButton(this);
-//                };
+
                 sysadmin_MainContainer.getAppState();
 
             });

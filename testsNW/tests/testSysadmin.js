@@ -353,6 +353,5 @@ module.exports= {
                 })
 
             ;browser.end();
-
         }
 };

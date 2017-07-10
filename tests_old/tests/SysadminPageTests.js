@@ -18,6 +18,8 @@ function deleteTestBackUpFile() {
 
 module.exports= {
 
+    '@disabled': true,
+
     after : function(browser) {
         deleteTestBackUpFile();
     },

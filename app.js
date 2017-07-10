@@ -599,12 +599,17 @@ app.get("/sysadmin/changeLog/change_log", function (req, res) {
 
     var outData={};
     outData.columns=[];
+   // outData.items=[];
     outData.columns.push(
-         { "data":"ID", "name":"ID", "width":100, "type":"number"}
-        ,{ "data":"InstallDate", "name":"InstallDate", "width":80, "type":"text"}
-        ,{ "data":"Object", "name":"Object", "width":120, "type":"text"}//,"dateFormat":"DD.MM.YYYY HH:mm:ss
-        ,{ "data":"PosNumber", "name":"PosNumber", "width":80, "type":"numeric"}
+         { "data":"changeID", "name":"changeID", "width":100, "type":"text"}
+        ,{ "data":"changeObj", "name":"changeObj", "width":80, "type":"text"}
+        ,{ "data":"changeVal", "name":"changeVal", "width":100, "type":"text"}
+        ,{ "data":"changeDatetime", "name":"changeDatetime", "width":120, "type":"text"}
     );
+    var strJson = JSON.parse(fs.readFileSync('./dbConfig/change_log.json','utf-8'));  console.log("strJson=",strJson);
+    outData.items=strJson;
+
+    console.log("outData=",outData);
         res.send(outData);
         return;
 });

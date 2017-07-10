@@ -1,0 +1,5 @@
+[
+  { "changeID":"change_log_1", "changeObj":"change_log", "changeVal":"create table change_log(changeID varchar(200))", "changeDatetime":"2017-07-10 14:49:00" },
+  { "changeID":"change_log_2", "changeObj":"change_log", "changeVal":"ALTER TABLE change_log ADD ChangeID INT", "changeDatetime":"2017-07-10 14:53:00" },
+  { "changeID":"change_log_3", "changeObj":"change_log", "changeVal":"ALTER TABLE change_log ADD changeObj varchar(200)", "changeDatetime":"2017-07-10 14:53:00" }
+]

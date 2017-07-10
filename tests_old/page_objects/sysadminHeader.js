@@ -7,7 +7,8 @@ module.exports ={
             dbName:'#sysadmin_dbName',
             dbConnectionState:'#sysadmin_connectToDBState',
             user:'#sysadmin_ConnUserName',
-            StartUpParamsBtn:'#display_startup_params'
+            StartUpParamsBtn:'#display_startup_params',
+            btnChangeLog:"#btnChangeLog"
             //,ReportsConfigBtn:'#display_reports_config'
     }
 };
