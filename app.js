@@ -393,8 +393,7 @@ app.post("/sysadmin/backup_db", function (req, res) {
     var outData = {};
 
     database.checkIfDBExists(DBName, function (err, result) {
-        if (err) {
-            console.log("checkIfDBExists err=", err);
+        if (err) {                                                                  console.log("checkIfDBExists err=", err);
             outData.error = err.message;
             res.send(outData);
             return;
@@ -406,8 +405,7 @@ app.post("/sysadmin/backup_db", function (req, res) {
         }
         if (req.body.rewrite) {
             database.backupDB(backupParam, function (err, ok) {
-                if (err) {
-                    console.log("checkIfDBExists err=", err);
+                if (err) {                                                      console.log("checkIfDBExists err=", err);
                     outData.error = err.message;
                     res.send(outData);
                     return;
@@ -419,15 +417,13 @@ app.post("/sysadmin/backup_db", function (req, res) {
             fs.readdir('./backups/', function (err, files) {
                 for (var i in files) {
                     if (files[i] == backupFileName) {
-                        console.log("files[i]=" + "-" + files[i] + "-");
                         outData.fileExists = true;
                         res.send(outData);
                         return;
                     }
                 }
                 database.backupDB(backupParam, function (err, ok) {
-                    if (err) {
-                        console.log("checkIfDBExists err=", err);
+                    if (err) {                                                  console.log("checkIfDBExists err=", err);
                         outData.error = err.message;
                         res.send(outData);
                         return;
@@ -457,136 +453,138 @@ app.post("/sysadmin/restore_db", function (req, res) {
         fileName: restoreFileName
     };
     var outData = {};
-        database.checkIfDBExists(DBName, function (err, result) { console.log("checkIfDBExists");
-            if (err) {console.log( "checkIfDBExists err=", err);
-                outData.error = err.message;
-                res.send(outData);
-                return;
+    database.checkIfDBExists(DBName, function (err, result) {
+        if (err) {                      console.log("checkIfDBExists err=", err);
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        if (result.length == 0) {
+            outData.error = "Impossible to restore! Database " + DBName + " is not exists!";
+            res.send(outData);
+            return;
+        }
+        var fileToRestore;
+        var files = fs.readdirSync('./backups/');
+        for (var i in files) {
+            if (files[i] == restoreFileName) {
+                fileToRestore = files[i];
             }
-            if (result.length == 0) {
-                outData.error = "Impossible to restore! Database " + DBName + " is not exists!";
-                res.send(outData);
-                return;
-            }
-            var fileToRestore;
-            var files = fs.readdirSync('./backups/');                               console.log("files=",files);
-                for (var i in files) {
-                    if (files[i] == restoreFileName) {
-                        fileToRestore = files[i];
-                    }
-                }
-                if (!fileToRestore) {
-                    outData.error = "Impossible to restore! File " + restoreFileName + " is not found!";
+        }
+        if (!fileToRestore) {
+            outData.error = "Impossible to restore! File " + restoreFileName + " is not found!";
+            res.send(outData);
+            return;
+        }
+
+        if (req.body.rewrite) {
+            database.dropDB(DBName, function (err, ok) {
+                if (err) {
+                    console.log("checkIfDBExists err=", err);
+                    outData.error = err.message;
                     res.send(outData);
                     return;
                 }
-
-                if (req.body.rewrite) {                                  console.log("req.body.rewrite  495");
-                    database.dropDB(DBName, function (err, ok) {
+                outData.DBdropped = ok;
+                database.createNewDB(DBName, function (err, ok) {
+                    if (err) {
+                        console.log("createNewDB err=", err);
+                        outData.error = err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    outData.DBCreated = ok;
+                    database.checkIfUserExists(userName, function (err, result) {
                         if (err) {
-                            console.log("checkIfDBExists err=", err);
+                            console.log("checkIfUserExists err=", err);
                             outData.error = err.message;
                             res.send(outData);
                             return;
                         }
-                        outData.DBdropped = ok;
-                        database.createNewDB(DBName, function (err, ok) {
-                            if (err) {
-                                console.log("createNewDB err=", err);
-                                outData.error = err.message;
-                                res.send(outData);
-                                return;
-                            }
-                            outData.DBCreated = ok;
-                            database.checkIfUserExists(userName, function (err, result) {
+                        if (result.length > 0) {
+                            outData.userExists = "User " + userName + " is already exists!";
+                            database.grantUserAccess(host, userName, DBName, function (err, ok) {
                                 if (err) {
-                                    console.log("checkIfUserExists err=", err);
+                                    console.log("createNewUser err=", err);
                                     outData.error = err.message;
                                     res.send(outData);
                                     return;
                                 }
-                                if (result.length > 0) {
-                                    outData.userExists = "User " + userName + " is already exists!";
-                                    database.grantUserAccess(host, userName, DBName, function (err, ok) {
-                                        if (err) {
-                                            console.log("createNewUser err=", err);
-                                            outData.error = err.message;
-                                            res.send(outData);
-                                            return;
-                                        }
-                                        outData.accessAdded = ok;
-                                        database.restoreDB(restoreParams, function (err, ok) {
-                                            if (err) {
-                                                console.log("restoreDB err=", err);
-                                                outData.error = err.message;
-                                                res.send(outData);
-                                                return;
-                                            }
-                                            outData.restore = ok;
-                                            res.send(outData);
-                                        })
-                                    })
-                                } else {
-                                    database.createNewUser(host, userName, userPassword, function (err, ok) {
-                                        if (err) {
-                                            console.log("createNewUser err=", err);
-                                            outData.error = err.message;
-                                            res.send(outData);
-                                            return;
-                                        }
-                                        outData.userCreated = ok;
-                                        database.grantUserAccess(host, userName, DBName, function (err, ok) {
-                                            if (err) {
-                                                console.log("createNewUser err=", err);
-                                                outData.error = err.message;
-                                                res.send(outData);
-                                                return;
-                                            }
-                                            outData.accessAdded = ok;
-                                            database.restoreDB(restoreParams, function (err, ok) {
-                                                if (err) {
-                                                    console.log("restoreDB err=", err);
-                                                    outData.error = err.message;
-                                                    res.send(outData);
-                                                    return;
-                                                }
-                                                outData.restore = ok;
-                                                res.send(outData);
-                                            })
-                                        })
-                                    });
+                                outData.accessAdded = ok;
+                                database.restoreDB(restoreParams, function (err, ok) {
+                                    if (err) {
+                                        console.log("restoreDB err=", err);
+                                        outData.error = err.message;
+                                        res.send(outData);
+                                        return;
+                                    }
+                                    outData.restore = ok;
+                                    res.send(outData);
+                                })
+                            })
+                        } else {
+                            database.createNewUser(host, userName, userPassword, function (err, ok) {
+                                if (err) {
+                                    console.log("createNewUser err=", err);
+                                    outData.error = err.message;
+                                    res.send(outData);
+                                    return;
                                 }
+                                outData.userCreated = ok;
+                                database.grantUserAccess(host, userName, DBName, function (err, ok) {
+                                    if (err) {
+                                        console.log("createNewUser err=", err);
+                                        outData.error = err.message;
+                                        res.send(outData);
+                                        return;
+                                    }
+                                    outData.accessAdded = ok;
+                                    database.restoreDB(restoreParams, function (err, ok) {
+                                        if (err) {
+                                            console.log("restoreDB err=", err);
+                                            outData.error = err.message;
+                                            res.send(outData);
+                                            return;
+                                        }
+                                        outData.restore = ok;
+                                        res.send(outData);
+                                    })
+                                })
                             });
-                        });
-                    })
-                } else {                                                           console.log(" 495");
-                    database.isDBEmpty(DBName, function (err, recodrset) {                 console.log("isDBEmpty recodrset 564=",recodrset);
+                        }
+                    });
+                });
+            })
+        } else {
+            console.log(" 495");
+            database.isDBEmpty(DBName, function (err, recodrset) {
+                console.log("isDBEmpty recodrset 564=", recodrset);
+                if (err) {
+                    console.log("restoreDB err=", err);
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                if (!recodrset) {
+                    database.restoreDB(restoreParams, function (err, ok) {
+                        console.log("restoreDB");
                         if (err) {
                             console.log("restoreDB err=", err);
                             outData.error = err.message;
                             res.send(outData);
                             return;
                         }
-                        if (!recodrset) {
-                            database.restoreDB(restoreParams, function (err, ok) {
-                                console.log("restoreDB");
-                                if (err) {
-                                    console.log("restoreDB err=", err);
-                                    outData.error = err.message;
-                                    res.send(outData);
-                                    return;
-                                }
-                                outData.restore = ok;
-                                res.send(outData);
-                            })
-                        } else {
-                            outData.dropDBConfirm = "dropDBConfirm";
-                            res.send(outData);
-                        }
-                    });
+                        outData.restore = ok;
+                        res.send(outData);
+                    })
+                } else {
+                    outData.dropDBConfirm = "dropDBConfirm";
+                    res.send(outData);
                 }
-        });
+            });
+        }
     });
+});
 
 app.get("/sysadmin/changeLog", function (req, res) {
     log.info("URL: /sysadmin/changeLog");
@@ -595,24 +593,117 @@ app.get("/sysadmin/changeLog", function (req, res) {
 
 app.get("/sysadmin/changeLog/change_log", function (req, res) {
     log.info("/sysadmin/changeLog/change_log",req.params," ", JSON.stringify(req.query));
-    //var initialCRID= req.params[0].replace("Sales","");
 
     var outData={};
     outData.columns=[];
-   // outData.items=[];
+    outData.items=[];
     outData.columns.push(
          { "data":"changeID", "name":"changeID", "width":100, "type":"text"}
-        ,{ "data":"changeObj", "name":"changeObj", "width":80, "type":"text"}
-        ,{ "data":"changeVal", "name":"changeVal", "width":100, "type":"text"}
-        ,{ "data":"changeDatetime", "name":"changeDatetime", "width":120, "type":"text"}
-    );
-    var strJson = JSON.parse(fs.readFileSync('./dbConfig/change_log.json','utf-8'));  console.log("strJson=",strJson);
-    outData.items=strJson;
+        ,{ "data":"changeDatetime", "name":"changeDatetime", "width":200, "type":"text"}
+        ,{ "data":"changeObj", "name":"changeObj", "width":100, "type":"text"}
+        ,{ "data":"changeVal", "name":"changeVal", "width":300, "type":"text"}
 
-    console.log("outData=",outData);
+    );
+    var logFilesArr=JSON.parse(fs.readFileSync('./dbConfig/dbModel.json','utf-8'));
+
+    for(var i in logFilesArr){
+         var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/'+logFilesArr[i]+'.json','utf-8'));
+         for (var j in jsonFile){
+             outData.items.push(jsonFile[j]);
+         }
+    }
         res.send(outData);
-        return;
 });
+
+app.get("/sysadmin/changeLog/current_changes", function (req, res) {
+    log.info("/sysadmin/changeLog/current_changes", req.params, " ", JSON.stringify(req.query));
+
+    var outData = {};
+    outData.columns = [];
+    outData.items = [];
+    outData.columns.push(
+          {"data": "changeID", "name": "changeID", "width": 100, "type": "text"}
+        , {"data": "changeDatetime", "name": "changeDatetime", "width": 200, "type": "text"}
+        , {"data": "changeObj", "name": "changeObj", "width": 100, "type": "text"}
+        , {"data": "changeVal", "name": "changeVal", "width": 300, "type": "text"}
+        , {"data": "type", "name": "type", "width": 100, "type": "text"}
+        , {"data": "message", "name": "message", "width": 200, "type": "text"}
+    );
+    database.checkIfChangeLogExists(function (err, existsBool) {
+        if (err) {
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        if (!existsBool) {
+            var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
+            for (var i in logFilesArr) {
+                var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + logFilesArr[i] + '.json', 'utf-8'));
+                for (var j in jsonFile) {
+                    jsonFile[j].type = "new";
+                    jsonFile[j].message = "not applied";
+                    outData.items.push(jsonFile[j]);
+                }
+            }
+            res.send(outData);
+            return;
+        }
+        var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
+        matchLogFilesArray(logFilesArr, outData, 0, function (outData) {
+            res.send(outData);
+        });
+    });
+});
+
+function matchLogFilesArray(logFilesArr,outData,ind,callback){
+    var file = logFilesArr[ind];
+    if (!file) {
+        callback(outData);
+        return;
+    }
+    var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + file + '.json', 'utf-8'));
+    matchLogData(jsonFile, outData, 0, function(data){
+        matchLogFilesArray(logFilesArr,data,ind+1,callback)
+    });
+}
+
+function matchLogData(logsData, outData, ind, callback){
+    var logData = logsData[ind];
+    if (!logData) {
+        callback(outData);
+        return;
+    }
+    database.checkIfChangeLogIDExists(logData.changeID, function (err, existsBool) {
+        if (err) {                                                        console.log("checkIfChangeLogIDExists err=",err);
+            outData.error = err.message;
+            res.send(outData);
+            matchLogData(null,outData);
+        }
+        if (!existsBool) {
+            logData.type = "new";
+            logData.message = "not applied";
+            outData.items.push(logData);
+            matchLogData(logsData, outData, ind+1,callback);
+
+        } else {
+            database.matchChangeLogFields(logData,function(err, identicalBool){
+                if (err) {              console.log("err  729=",err);
+                    outData.error = err.message;
+                    res.send(outData);
+                    return
+                }
+                if(!identicalBool){
+                    logData.type = "warning";
+                    logData.message = "Current update has not identical fields!";
+                    outData.items.push(logData);
+                    matchLogData(logsData, outData, ind+1,callback);
+                }else{
+                    matchLogData(logsData, outData, ind+1,callback);
+                }
+            })
+        }
+    });
+}
 
 server.listen(port, function (err) {
     console.log("server runs on port " + port);

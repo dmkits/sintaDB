@@ -237,6 +237,61 @@ module.exports.createChangelogTable= function(callback) {
     );
 };
 
+
+module.exports.checkIfChangeLogExists= function(callback) {         console.log("checkIfChangeLogExists");
+
+    connection.query("select * From INFORMATION_SCHEMA.tables where TABLE_NAME = 'change_log'",
+        function (err, recordset) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            if(recordset.length==0){
+                callback(null,false);
+            }else{
+                callback(null,true);
+            }
+        }
+    );
+};
+
+module.exports.checkIfChangeLogIDExists= function(id, callback) {        console.log("checkIfChangeLogIDExists");
+
+    connection.query("select * FROM change_log where ID = '"+id+"'",
+        function (err, recordset) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            if(recordset.length==0){
+                callback(null,false);
+            }else{
+                callback(null,true);
+            }
+        }
+    );
+};
+
+module.exports.matchChangeLogFields= function(data, callback) {                 console.log("matchChangeLogFields");
+var ID=data.changeID;
+    var CHANGE_DATETIME=data.changeDatetime;
+    var CHANGE_VAL=data.changeVal;
+    var CHANGE_OBJ=data.changeObj;
+    connection.query("select * FROM change_log where ID = '"+ID+"' AND CHANGE_DATETIME='"+CHANGE_DATETIME+"' AND CHANGE_VAL='"+CHANGE_VAL+"' AND CHANGE_OBJ='"+CHANGE_OBJ+"'",
+        function (err, recordset) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            if(recordset.length==0){
+                callback(null,false);
+            }else{
+                callback(null,true);
+            }
+        }
+    );
+};
+
 //function formatDate(date){
 //    var dch = date.split("");
 //    var newDateFormat = dch[0] + dch[1] + dch[2] + dch[3] + "-" + dch[4] + dch[5] + "-" + dch[6] + dch[7] + " " + dch[8] + dch[9] + ":" + dch[10] + dch[11] + ":" + dch[12] + dch[13];
