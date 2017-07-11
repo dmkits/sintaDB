@@ -50,20 +50,6 @@ var path = require('path');
 log.info('path...', new Date().getTime() - startTime);//test
 var bodyParser = require('body-parser');
 log.info('body-parser...', new Date().getTime() - startTime);//test
-//var cookieParser = require('cookie-parser');
-//log.info('cookie-parser...', new Date().getTime() - startTime);//test
-//var request = require('request');
-//log.info('request...', new Date().getTime() - startTime);//test
-
-//var Buffer = require('buffer').Buffer;
-//log.info('buffer...', new Date().getTime() - startTime);//test
-//var iconv_lite = require('iconv-lite');
-//log.info('iconv-lite...', new Date().getTime() - startTime);//test
-//var xml2js = require('xml2js');
-//var parseString = xml2js.parseString;
-//var builder = new xml2js.Builder();
-//log.info('xml2js...', new Date().getTime() - startTime);//test
-
 
 var app = express();
 var server = require('http').Server(app);
@@ -72,7 +58,7 @@ var io = require('socket.io')(server);
 log.info('socket.io...', new Date().getTime() - startTime);//test
 
 
-//app.use(cookieParser());
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(bodyParser.text());
@@ -110,23 +96,6 @@ app.get("/sysadmin", function (req, res) {
     log.info('URL: /sysadmin');
     res.sendFile(path.join(__dirname, '/views', 'sysadmin.html'));
 });
-//app.get("/sysadmin/app_state", function (req, res) {
-//    log.info('URL: /sysadmin/app_state');
-//    var outData = {};
-//    outData.mode = app_params.mode;
-//    outData.port=port;
-//    if (ConfigurationError) {
-//        outData.error = ConfigurationError;
-//        res.send(outData);
-//        return;
-//    }
-//    outData.configuration = database.getDBConfig();
-//    if (DBConnectError)
-//        outData.dbConnection = DBConnectError;
-//    else
-//        outData.dbConnection = 'Connected';
-//    res.send(outData);
-//});
 
 app.get("/sysadmin/app_state", function(req, res){                                     log.info("app.get /sysadmin/app_state");
     var outData= {};
@@ -145,7 +114,6 @@ app.get("/sysadmin/app_state", function(req, res){                              
         outData.dbConnection='Connected';
     res.send(outData);
 });
-
 
 app.get("/sysadmin/startup_parameters", function (req, res) {
     log.info('URL: /sysadmin/startup_parameters');
@@ -184,50 +152,6 @@ app.post("/sysadmin/startup_parameters/store_app_config_and_reconnect", function
         }
     );
 });
-
-//app.get("/sysadmin/DBadmin", function (req, res) {
-//    log.info('URL: /sysadmin/createDB');
-//    res.sendFile(path.join(__dirname, '/views/sysadmin', 'DBadmin.html'));
-//});
-
-//app.post("/sysadmin/connect_to_mysql", function (req, res) { // console.log("req=",req);
-//    log.info('sysadmin/connect_to_mysql');
-//    var connParams={
-//        host: req.body.host,
-//        user: req.body.user,
-//        password: req.body.password
-//    };
-//    database.mySQLConnection(connParams,function(err, ok){
-//     var outData={};
-//            if (err) {
-//                outData.error=err.message;
-//                res.send(outData);
-//                return;
-//            }
-//        outData.ok=ok;
-//        res.send(outData);
-//    });
-//
-//});
-//
-//app.post("/sysadmin/create_new_DB", function (req, res) {
-//    log.info('sysadmin/create_new_DB');
-//    var newDBName= req.body.newDBName;
-//
-//    database.createNewDB(newDBName,function(err, ok){
-//        var outData={};
-//        if (err) {
-//            outData.err=err;
-//            res.send(outData);
-//            return;
-//        }
-//        outData.ok=ok;
-//        res.send(outData);
-//    });
-//
-//});
-///sysadmin/create_new_db
-
 
 app.post("/sysadmin/create_new_db", function (req, res) {
     log.info('sysadmin/create_new_db');
@@ -312,8 +236,6 @@ app.post("/sysadmin/drop_db", function (req, res) {
     log.info("/sysadmin/drop_db");
     var host = req.body.host;
     var DBName = req.body.database;
-   // var userName = req.body.user;
-   // var userPassword = req.body.password;
 
     var connParams = {
         host: host,
@@ -351,8 +273,6 @@ app.post("/sysadmin/drop_db", function (req, res) {
         });
     });
 });
-
-
 
 app.post("/sysadmin/auth_as_sysadmin", function (req, res) {
     log.info("/sysadmin/auth_as_sysadmin");
@@ -533,7 +453,7 @@ app.post("/sysadmin/restore_db", function (req, res) {
                                 outData.userCreated = ok;
                                 database.grantUserAccess(host, userName, DBName, function (err, ok) {
                                     if (err) {
-                                        console.log("createNewUser err=", err);
+                                        console.log("grantUserAccess err=", err);
                                         outData.error = err.message;
                                         res.send(outData);
                                         return;
@@ -556,7 +476,6 @@ app.post("/sysadmin/restore_db", function (req, res) {
                 });
             })
         } else {
-            console.log(" 495");
             database.isDBEmpty(DBName, function (err, recodrset) {
                 console.log("isDBEmpty recodrset 564=", recodrset);
                 if (err) {
@@ -567,7 +486,6 @@ app.post("/sysadmin/restore_db", function (req, res) {
                 }
                 if (!recodrset) {
                     database.restoreDB(restoreParams, function (err, ok) {
-                        console.log("restoreDB");
                         if (err) {
                             console.log("restoreDB err=", err);
                             outData.error = err.message;
@@ -629,7 +547,7 @@ app.get("/sysadmin/changeLog/current_changes", function (req, res) {
         , {"data": "type", "name": "type", "width": 100, "type": "text"}
         , {"data": "message", "name": "message", "width": 200, "type": "text"}
     );
-    database.checkIfChangeLogExists(function (err, existsBool) {
+    database.checkIfChangeLogExists(function(err, existsBool) {
         if (err) {
             outData.error = err.message;
             res.send(outData);
@@ -674,7 +592,7 @@ function matchLogData(logsData, outData, ind, callback){
         return;
     }
     database.checkIfChangeLogIDExists(logData.changeID, function (err, existsBool) {
-        if (err) {                                                        console.log("checkIfChangeLogIDExists err=",err);
+        if (err) {
             outData.error = err.message;
             res.send(outData);
             matchLogData(null,outData);
@@ -687,7 +605,7 @@ function matchLogData(logsData, outData, ind, callback){
 
         } else {
             database.matchChangeLogFields(logData,function(err, identicalBool){
-                if (err) {              console.log("err  729=",err);
+                if (err) {              console.log("matchChangeLogFields err=",err);
                     outData.error = err.message;
                     res.send(outData);
                     return
@@ -706,6 +624,10 @@ function matchLogData(logsData, outData, ind, callback){
 }
 
 server.listen(port, function (err) {
+    if(err){
+        console.log("listen port err= ", err);
+        return;
+    }
     console.log("server runs on port " + port);
     log.info("server runs on port " + port, new Date().getTime() - startTime);
 });

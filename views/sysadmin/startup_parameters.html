@@ -8,9 +8,9 @@
 <div style="display: none" id="startup_hideAll">
 <div id="sa_startup_params_PageContent" style="width:510px;height:100%; margin:0;padding:0;">
 
-    <table width="100%"> <!--height="100%"-->
+    <table width="100%">
         <tr>
-            <td height="20px"> <!--height="20px"-->
+            <td height="20px">
                 <table width="100%">
                     <tr>
                         <th height="30px" width="180px"><b>system startup parameters:</b></th>
@@ -23,7 +23,7 @@
             </td>
         </tr>
         <tr>
-            <td height="100px"> <!--height="1px"-->
+            <td height="100px">
                 <table width="500px">
                     <tr>
                         <td><label for="db.host">db.host </label></td>
@@ -45,13 +45,13 @@
             </td>
         </tr>
         <tr>
-            <td height="40px"> <!--height="30px"-->
+            <td height="40px">
                 <button id="SA_startup_params_BtnAppLocalConfigLoad">Load settings</button>
                 <button id="SA_startup_params_BtnAppLocalConfigSaveAndReconnect">Store settings & reconnect to database</button>
             </td>
         </tr>
         <tr>
-            <td height="30px"> <!--height="30px"-->
+            <td height="30px">
                 <table>
                     <tr>
                         <td style="width:75px">
@@ -236,7 +236,6 @@
                     if(backupFilename.length<1){
                         cleanResultFields();
                         document.getElementById("backup_db_result").innerHTML = "<b style='color:red'> File name for backup wasn't specified </b>";
-                      //  document.getElementById('admin_password').value='';
                         backupDialog.hide();
                         return;
                     }
@@ -349,7 +348,6 @@
                     sa_startup_params_appLocalConfig.innerHTML = "<div><b>Configuration saving and reconnecting to database...</b></div>";
                     var newDBConfig={
                         "host": hostInput.get('value'),
-                       // "port": portInput.get('value'),
                         "database": databaseInput.get('value'),
                         "user": userInput.get('value'),
                         "password": dbPasswordInput.get('value')

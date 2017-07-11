@@ -1,6 +1,7 @@
 
 
 module.exports= {
+//'@disabled': true,
 
     'Sysadmin Header If  All Elements Visible Tests': function (browser) {
         var mainHeader = browser.page.sysadminHeader();
@@ -27,7 +28,7 @@ module.exports= {
             .assertHeaderContainsText('4', 'changeVal')
 
             .assertCellContainsText('1','1','chl__1')
-            .assertCellContainsText('1','2','2016-08-29T09:01:00.000+0300')
+            .assertCellContainsText('1','2','2016-08-29T09:01:00.000')
             .assertCellContainsText('1','3','change_log')
             .assertCellContainsText('1','4','CREATE TABLE change_log')
             .waitForElementVisible('@totalRowLabel')

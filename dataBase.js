@@ -154,17 +154,14 @@ module.exports.dropDB= function(DBName,callback) {
 };
 
 
-module.exports.isDBEmpty= function(DBName,callback) {         console.log("isDBEmpty DBName=",DBName);
-   // var isEmpty;
+module.exports.isDBEmpty= function(DBName,callback) {
+
     connection.query("SELECT table_name FROM information_schema.tables where table_schema='"+DBName+"'",
-        function (err,recordset ) {        console.log("isDBEmpty recordset=",recordset);
+        function (err,recordset ) {
             if (err) {
                 callback(err);
                 return;
             }
-           // if(recordset.length==0) isEmpty=true;
-
-            //console.log("isEmpty=",isEmpty);
             callback(null,recordset[0]);
         }
     );
@@ -184,26 +181,7 @@ module.exports.backupDB= function(backupParam,callback) {
             }
             callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
         });
-
-//    var tool = new MysqlTools();
-//    tool.dumpDatabase({
-//        host: backupParam.host
-//        , user: backupParam.user
-//        , password: backupParam.password
-//        , dumpPath: './backups/'/*+backupParam.fileName*/
-//        , database: backupParam.database
-//    }, function (error, output, message, dumpFileName) {
-//        if (error instanceof Error) {
-//            console.log(error);
-//        } else {
-//            console.log(output);
-//            console.log(message);
-//            console.log(dumpFileName);
-//            callback(null,"Database "+backupParam.database+" backup saved to "+backupParam.fileName);
-//        }
-//    });
-//};
-}
+};
 
 module.exports.restoreDB= function(restoreParams,callback) {
     var tool = new MysqlTools();
@@ -237,8 +215,7 @@ module.exports.createChangelogTable= function(callback) {
     );
 };
 
-
-module.exports.checkIfChangeLogExists= function(callback) {         console.log("checkIfChangeLogExists");
+module.exports.checkIfChangeLogExists= function(callback) {
 
     connection.query("select * From INFORMATION_SCHEMA.tables where TABLE_NAME = 'change_log'",
         function (err, recordset) {
@@ -255,7 +232,7 @@ module.exports.checkIfChangeLogExists= function(callback) {         console.log(
     );
 };
 
-module.exports.checkIfChangeLogIDExists= function(id, callback) {        console.log("checkIfChangeLogIDExists");
+module.exports.checkIfChangeLogIDExists= function(id, callback) {
 
     connection.query("select * FROM change_log where ID = '"+id+"'",
         function (err, recordset) {
@@ -272,7 +249,7 @@ module.exports.checkIfChangeLogIDExists= function(id, callback) {        console
     );
 };
 
-module.exports.matchChangeLogFields= function(data, callback) {                 console.log("matchChangeLogFields");
+module.exports.matchChangeLogFields= function(data, callback) {
 var ID=data.changeID;
     var CHANGE_DATETIME=data.changeDatetime;
     var CHANGE_VAL=data.changeVal;
@@ -292,14 +269,5 @@ var ID=data.changeID;
     );
 };
 
-//function formatDate(date){
-//    var dch = date.split("");
-//    var newDateFormat = dch[0] + dch[1] + dch[2] + dch[3] + "-" + dch[4] + dch[5] + "-" + dch[6] + dch[7] + " " + dch[8] + dch[9] + ":" + dch[10] + dch[11] + ":" + dch[12] + dch[13];
-//    return newDateFormat;
-//}
-
-function detectPaymentForm(PaymentForm){
-    return  PaymentForm == '0' ? 1 : 2;
-}
 
 
