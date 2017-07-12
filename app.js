@@ -623,6 +623,70 @@ function matchLogData(logsData, outData, ind, callback){
     });
 }
 
+
+app.post("/sysadmin/database/apply_changes", function (req, res) {
+    log.info('/sysadmin/database/apply_changes');
+var outData={};
+    var ChangeLogData=req.body;
+    var ID=req.body.changeID;
+    //var CHANGE_DATETIME=req.body.changeDatetime;
+    //var CHANGE_OBJ=req.body.changeObj;
+    var CHANGE_VAL=req.body.changeVal;
+
+    database.checkIfChangeLogExists(function(err, existsBool){
+        if(err){
+            outData.error=err.message;
+            res.send(outData);
+            return;
+        }
+        if(existsBool) {
+            database.checkIfChangeLogIDExists(ID, function (err, existsBool) {
+                if (err) {
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                if (existsBool) {
+                    outData.error = "Change log with ID is already exists";
+                    res.send(outData);
+                    return;
+                }
+                database.executeQuery(CHANGE_VAL, function (err) {
+                    if (err) {
+                        outData.error = err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    database.writeToChangeLog(req.body, function (err) {
+                        if (err) {
+                            outData.error = err.message;
+                            res.send(outData);
+                            return;
+                        }
+                        res.send({success:'ok'});
+                    })
+                })
+            })
+        }else{
+            database.executeQuery(CHANGE_VAL, function (err) {
+                if (err) {
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                database.writeToChangeLog(req.body, function (err) {
+                    if (err) {
+                        outData.error = err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    res.send({success:'ok'});
+                })
+            })
+        }
+    });
+});
+
 server.listen(port, function (err) {
     if(err){
         console.log("listen port err= ", err);

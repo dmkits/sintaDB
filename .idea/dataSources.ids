@@ -2525,14 +2525,6 @@
       <column name="VARIABLE_NAME" sqlType="VARCHAR" precision="64" scale="0" nullable="false" jdbcType="12"/>
       <column name="VARIABLE_VALUE" sqlType="VARCHAR" precision="1024" scale="0" nullable="true" jdbcType="12"/>
     </table>
-    <table name="change_log" schema="" catalog="sample_sinta" type="TABLE">
-      <column name="ID" sqlType="VARCHAR" precision="64" scale="0" nullable="false" jdbcType="12"/>
-      <column name="CHANGE_DATETIME" sqlType="TIMESTAMP" precision="19" scale="0" nullable="false" jdbcType="93" def="Q1VSUkVOVF9USU1FU1RBTVA=" version="true"/>
-      <column name="CHANGE_OBJ" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
-      <column name="CHANGE_VAL" sqlType="VARCHAR" precision="20000" scale="0" nullable="false" jdbcType="12"/>
-      <column name="APPLIED_DATETIME" sqlType="TIMESTAMP" precision="19" scale="0" nullable="true" jdbcType="93"/>
-      <primary-key name="PRIMARY" columns="ID"/>
-    </table>
     <table name="shop" schema="" catalog="sample_sinta" type="TABLE">
       <column name="article" sqlType="INT UNSIGNED" precision="10" scale="0" nullable="false" jdbcType="4" def="MDAwMA=="/>
       <column name="dealer" sqlType="CHAR" precision="20" scale="0" nullable="false" jdbcType="1" def="Jyc="/>

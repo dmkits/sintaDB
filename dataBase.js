@@ -270,4 +270,33 @@ var ID=data.changeID;
 };
 
 
+module.exports.executeQuery= function(query, callback) {
 
+    connection.query(query,
+        function (err, recordset) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,"ok");
+        }
+    );
+};
+
+module.exports.writeToChangeLog= function(data, callback) {
+
+    var ID=data.changeID;
+    var CHANGE_DATETIME=data.changeDatetime;
+    var CHANGE_OBJ=data.changeObj;
+    var CHANGE_VAL=data.changeVal;
+
+    connection.query( "INSERT INTO change_log (ID, CHANGE_DATETIME, CHANGE_OBJ, CHANGE_VAL, APPLIED_DATETIME) VALUES ('"+ID+"','"+CHANGE_DATETIME+"','"+CHANGE_OBJ+"','"+CHANGE_VAL+"', NOW() );",
+        function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,"ok");
+        }
+    );
+};

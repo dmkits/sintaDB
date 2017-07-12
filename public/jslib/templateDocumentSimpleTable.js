@@ -204,7 +204,7 @@ define(["dojo/_base/declare", "app", "templateDocumentBase", "hTableSimpleFilter
                 return this;
             },
 
-            setPopupMenuItem: function(itemID, itemName, callback){
+            addPopupMenuItem: function(itemID, itemName, callback){
                 this.detailContentHTable.setMenuItem(itemID, itemName, callback);
                 return this;
             },
