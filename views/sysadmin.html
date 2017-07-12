@@ -29,7 +29,7 @@
         </div>
         <div id="sysadmin_TopActions">
             <button id="display_startup_params">Startup params</button>
-            <button id="btnChangeLog">Change Log</button>
+            <button id="btnDatabase">Database</button>
         </div>
     </div>
     <div id="sysadmin_ContentContainer"></div>
@@ -69,8 +69,8 @@
 
                 var startupBtn = new ToggleButton({id:"display_startup_params",iconClass:'dijitCheckBoxIcon'},"display_startup_params");
                 functionalButtons.push(startupBtn);
-                var btnChangeLog = new ToggleButton({id:"btnChangeLog",iconClass:'dijitCheckBoxIcon'},"btnChangeLog");
-                functionalButtons.push(btnChangeLog);
+                var btnDatabase = new ToggleButton({id:"btnDatabase",iconClass:'dijitCheckBoxIcon'},"btnDatabase");
+                functionalButtons.push(btnDatabase);
 
                 var sysadmin_ContentContainer = APP.instanceForID("sysadmin_ContentContainer",
                         StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
@@ -162,8 +162,8 @@
                     checkButton(this);
                 };
 
-                btnChangeLog.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(btnChangeLog, "btnChangeLog", "Change Log", false, "/sysadmin/changeLog");
+                btnDatabase.onClick=function(){
+                    sysadmin_MainContainer.runSysadminContentPage(btnDatabase, "btnDatabase", "Database", false, "/sysadmin/database");
                     checkButton(this);
                 };
 

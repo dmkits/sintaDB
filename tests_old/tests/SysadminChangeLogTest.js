@@ -8,9 +8,9 @@ module.exports= {
         mainHeader
             .navigate()
             .waitForElementVisible("@img")
-            .waitForElementVisible("@btnChangeLog")
-            .click('@btnChangeLog')
-            .assert.attributeContains('@btnChangeLog', 'aria-pressed', 'true');
+            .waitForElementVisible("@btnDatabase")
+            .click('@btnDatabase')
+            .assert.attributeContains('@btnDatabase', 'aria-pressed', 'true');
     },
 
     'Sysadmin ChangeLogTable Tests': function(browser){
@@ -18,9 +18,9 @@ module.exports= {
 
         var ChangeLogPage=browser.page.ChangeLogPage();
         ChangeLogPage
-            .waitForElementVisible('@sysadmin_changeLog_ContentPaneDetailContainer')
+            .waitForElementVisible('@sysadmin_database_ContentPaneDetailContainer')
             .waitForElementVisible('@refreshBtn')
-            .assert.containsText('@sysadmin_changeLog_ContentPaneDetailContainer',"Show Change Logs")
+            .assert.containsText('@sysadmin_database_ContentPaneDetailContainer',"Show Change Logs")
 
             .assertHeaderContainsText('1', 'changeID')
             .assertHeaderContainsText('2', 'changeDatetime')

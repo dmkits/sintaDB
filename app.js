@@ -504,13 +504,13 @@ app.post("/sysadmin/restore_db", function (req, res) {
     });
 });
 
-app.get("/sysadmin/changeLog", function (req, res) {
-    log.info("URL: /sysadmin/changeLog");
-    res.sendFile(path.join(__dirname, '/views/sysadmin', 'changeLog.html'));
+app.get("/sysadmin/database", function (req, res) {
+    log.info("URL: /sysadmin/database");
+    res.sendFile(path.join(__dirname, '/views/sysadmin', 'database.html'));
 });
 
-app.get("/sysadmin/changeLog/change_log", function (req, res) {
-    log.info("/sysadmin/changeLog/change_log",req.params," ", JSON.stringify(req.query));
+app.get("/sysadmin/database/change_log", function (req, res) {
+    log.info("/sysadmin/database/change_log",req.params," ", JSON.stringify(req.query));
 
     var outData={};
     outData.columns=[];
@@ -533,8 +533,8 @@ app.get("/sysadmin/changeLog/change_log", function (req, res) {
         res.send(outData);
 });
 
-app.get("/sysadmin/changeLog/current_changes", function (req, res) {
-    log.info("/sysadmin/changeLog/current_changes", req.params, " ", JSON.stringify(req.query));
+app.get("/sysadmin/database/current_changes", function (req, res) {
+    log.info("/sysadmin/database/current_changes", req.params, " ", JSON.stringify(req.query));
 
     var outData = {};
     outData.columns = [];

@@ -1,4 +1,4 @@
-var changeLogCommands={
+var databaseCommands={
     //assertHeaderNumberWithTextVisible:function(headerNumber, text){
     //    this.elements.tableHeader={
     //        selector:"//div[@class='ht_clone_top handsontable']//table[@class='htCore']//thead/tr[2]/th["+headerNumber+"]//span[contains(text(), '"+text+"')]",
@@ -43,22 +43,22 @@ var changeLogCommands={
 };
 
 module.exports = {
-    commands:[changeLogCommands],
+    commands:[databaseCommands],
     elements: {
-        sysadmin_changeLog_ContentPaneDetailContainer:"#sysadmin_changeLog_ContentPaneDetailContainer",
+        sysadmin_database_ContentPaneDetailContainer:"#sysadmin_database_ContentPaneDetailContainer",
 
         refreshBtn:{
-            selector:"//*[@id='sysadmin_changeLog_ContentPaneDetailContainer']//input[@type='button']/ancestor::span[@role='presentation']//span[contains(text(), 'Обновить')]",
+            selector:"//*[@id='sysadmin_database_ContentPaneDetailContainer']//input[@type='button']/ancestor::span[@role='presentation']//span[contains(text(), 'Обновить')]",
             locateStrategy:'xpath'
         },
 
         totalRowLabel:{
-            selector:"//*[@id='sysadmin_changeLog_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]",
+            selector:"//*[@id='sysadmin_database_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]",
             locateStrategy:'xpath'
         },
 
         totalRowValueInput:{
-            selector:"//*[@id='sysadmin_changeLog_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]/ancestor::td//input[@type='hidden']",
+            selector:"//*[@id='sysadmin_database_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]/ancestor::td//input[@type='hidden']",
             locateStrategy:'xpath'
         }
     }
