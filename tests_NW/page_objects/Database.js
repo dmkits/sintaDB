@@ -44,8 +44,7 @@ var databaseCommands={
 
         });
         return instance
-        .moveToElement("@tableCell",3,3);
-
+        .moveToElement("@tableCell",15,15);
     },
     mouseButtonDown:function(btn){
         var instance=this;

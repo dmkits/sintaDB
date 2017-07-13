@@ -48,26 +48,27 @@ module.exports= {
             .assertHeaderContainsText('@currentChangesTable','5', 'type')
             .assertHeaderContainsText('@currentChangesTable','6', 'message')
 
-
             .assertCellContainsText('@currentChangesTable','1','1','chl__1')
             .assertCellContainsText('@currentChangesTable','1','2','2016-08-29T09:01:00.000')
             .assertCellContainsText('@currentChangesTable','1','3','change_log')
             .assertCellContainsText('@currentChangesTable','1','4','CREATE TABLE change_log')
             .assertCellContainsText('@currentChangesTable','1','5','new')
             .assertCellContainsText('@currentChangesTable','1','6','not applied')
+
             .moveToCell('@currentChangesTable','1','1')
-            .mouseButtonClick('right')
-            .waitForElementVisible('@applyChangesDialog')
-            .moveToElement('@applyChangesDialog',5,5)
-            //.doubleClick()
-          //  .click("@applyChangesDialog")
             .mouseButtonDown("left")
+            .moveToCell('@currentChangesTable','3','3')
             .mouseButtonUp("left")
             .mouseButtonClick('right')
-           // .waitForElementNotVisible('@applyChangesDialog');
-           // .click('@applyChangesDialog')
-            //.waitForElementVisible('@refreshCurrentChangesBtn')
-            //.click('@refreshCurrentChangesBtn');
+            .waitForElementVisible('@applyChangesDialog')
+            .click('@applyChangesDialog')
+            .waitForElementVisible('@refreshCurrentChangesBtn')
+            .click('@refreshCurrentChangesBtn')
+            .waitForElementVisible('@currentChangesTable')
+            .assertCellContainsText('@currentChangesTable','1','1','dir_units__1');
+
+
+
 
 
 
