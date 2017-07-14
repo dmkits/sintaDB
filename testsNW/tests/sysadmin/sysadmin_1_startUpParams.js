@@ -20,6 +20,7 @@ module.exports= {
 
     '@disabled': true,
 
+
     after : function(browser) {
         deleteTestBackUpFile();
     },
@@ -66,23 +67,28 @@ module.exports= {
             .waitForElementVisible('@dbPasswordInput')
             .assert.valueContains('@dbPasswordInput','user')
 
+
+
             .waitForElementVisible('@localConfigInfo')
             .assert.containsText('@localConfigInfo', "Configuration loaded.")
             .click('@loadSettingsBtn')
             .assert.containsText('@localConfigInfo', "Configuration reloaded.")
             .waitForElementVisible('@dbHostInput')
+
+            .createTempDB()
             .clearValue('@dbHostInput')
             .setValue('@dbHostInput', '192.168.0.93_false')
             .click('@StoreAndReconnectBtn')
             .waitForElementVisible('@localConfigInfo')
             .assert.containsText('@localConfigInfo', "Configuration sav")
+          //  .waitForElementVisible('@localConfigInfo')  ////
             .assert.containsText('@localConfigInfo', "Failed to connect to database!");
 
         mainHeader.waitForElementVisible('@dbConnectionState')
             .assert.containsText("@dbConnectionState", "Failed to connect to database!");
 
         startUpParams
-            .resetDBConfig()
+            .resetTempDBConfig()
             .waitForElementVisible('@dbNameInput')
             .clearValue('@dbNameInput')
             .setValue('@dbNameInput', 'GMSSample38xml_false')
@@ -97,7 +103,7 @@ module.exports= {
             .assert.containsText("@dbConnectionState", "Failed to connect to database!");
 
         startUpParams
-            .resetDBConfig()
+            .resetTempDBConfig()
             .waitForElementVisible('@dbUserInput')
             .clearValue('@dbUserInput')
             .setValue('@dbUserInput','sa1')
@@ -108,7 +114,7 @@ module.exports= {
             .waitForElementVisible('@dbConnectionState')
             .assert.containsText("@dbConnectionState", "Failed to connect to database!");
 
-        startUpParams.resetDBConfig()
+        startUpParams.resetTempDBConfig()
             .waitForElementVisible('@dbPasswordInput')
             .clearValue('@dbPasswordInput')
             .setValue('@dbPasswordInput','false')
@@ -119,7 +125,7 @@ module.exports= {
             .assert.containsText("@dbConnectionState", "Failed to connect to database!");
 
         startUpParams
-            .resetDBConfig();
+            .resetTempDBConfig();
     },
 
     'Empty  Dialog Values': function (browser) {
@@ -184,7 +190,6 @@ module.exports= {
             .waitForElementVisible('@backupDBResultField')
             .assert.visible("@backupDBResultField")
             .assert.containsText('@backupDBResultField', 'FAIL!')
-
 
             .click('@restoreBtn')
             .assertAdminDialogIsEmpty()
@@ -259,8 +264,16 @@ module.exports= {
             .waitForElementVisible('@rewriteBackupDialog', 10000)
             .submitDialog('@rewriteBackupDialog')
             .waitForElementVisible('@backupDBResultField')
-            .assert.containsText('@backupDBResultField', 'backup saved');
+            .assert.containsText('@backupDBResultField', 'backup saved')
+            .dropTempDBAndReconnect();
+            //.waitForElementPresent('@dropDBBtn')
+            //.click('@dropDBBtn')
+            //.assertAdminDialogIsEmpty()
+            //.authorizeAsAdmin()
+            //.waitForElementVisible('@dropDBResultField')
+            //.assert.containsText('@dropDBResultField', 'dropped!')
+            //.setInitialDBConfig();
+
         browser.end();
     }
-
 };

@@ -26,19 +26,19 @@ module.exports.saveConfig=function(callback) {
         callback(err,success);
     })
 };
-module.exports.databaseConnection=function(callback){
+module.exports.databaseConnection=function(callback){  console.log("databaseConnection");
 
-    if(connection) {
+    if(connection) {                         console.log("if(connection)");
         connection.end(function (err) {
             connection=null;
-            if(err) console.log(err);
+            if("databaseConnection err=",err) console.log(err);
             return;
         });
     }
     connection=null;
     connection = mysql.createConnection(dbConfig);
     connection.connect(function (err) {
-          if (err) {
+          if (err) {                  if("databaseConnection connrct err=",err) console.log(err);
               connection=null;
               callback(err.message);
               return;
@@ -46,9 +46,9 @@ module.exports.databaseConnection=function(callback){
           callback(null,"connected");
       });
 };
-module.exports.mySQLAdminConnection = function (connParams, callback) {
+module.exports.mySQLAdminConnection = function (connParams, callback) {   console.log("mySQLAdminConnection");
     if (connection) {
-        connection.end(function (err) {
+        connection.end(function (err) {                                     console.log("mySQLAdminConnection if(connection)");
             if (err) {
                 connection=null;
                 callback(err);           console.log("err  connection.end =", err);
@@ -57,7 +57,7 @@ module.exports.mySQLAdminConnection = function (connParams, callback) {
             connection=null;
             connection = mysql.createConnection(connParams);
             connection.connect(function (err) {
-                if (err) {              console.log("createConnection err=",err);
+                if (err) {              console.log(" mySQLAdminConnection createConnection err=",err);
                     connection=null;
                     callback(err);
                     return;
@@ -215,11 +215,23 @@ module.exports.createChangelogTable= function(callback) {
     );
 };
 
-module.exports.checkIfChangeLogExists= function(callback) {
-
-    connection.query("select * From INFORMATION_SCHEMA.tables where TABLE_NAME = 'change_log'",
+module.exports.getChangeLog= function(callback) {
+    connection.query("select * from change_log;",
         function (err, recordset) {
             if (err) {
+                callback(err);
+                return;
+            }
+            callback(null,recordset);
+        }
+    );
+};
+
+module.exports.checkIfChangeLogExists= function(callback) {     console.log("checkIfChangeLogExists");
+
+    connection.query("select * from change_log where ID=null",
+        function (err, recordset) {
+            if (err) {                    console.log("checkIfChangeLogExists err=",err);
                 callback(err);
                 return;
             }
@@ -236,7 +248,7 @@ module.exports.checkIfChangeLogIDExists= function(id, callback) {
 
     connection.query("select * FROM change_log where ID = '"+id+"'",
         function (err, recordset) {
-            if (err) {
+            if (err) {                           console.log("checkIfChangeLogIDExists err=",err);
                 callback(err);
                 return;
             }

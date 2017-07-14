@@ -62,11 +62,10 @@
                     return button;
                 };
 
-                sysadmin_database_PageContainer.addButtonTo(sysadmin_database_ContentPaneLeft, "current_changes","Current Changes");
-                var showChangeLogsBtn= sysadmin_database_PageContainer.addButtonTo(sysadmin_database_ContentPaneLeft, "change_log","Show Change Logs");
-                sysadmin_database_PageContainer.addButtonTo(sysadmin_database_ContentPaneLeft, "update_db","Update Database");
+                var CurrentChangesBtn =sysadmin_database_PageContainer.addButtonTo(sysadmin_database_ContentPaneLeft, "current_changes","Current Changes");
+                var ChangeLogsBtn = sysadmin_database_PageContainer.addButtonTo(sysadmin_database_ContentPaneLeft, "change_log","Change Logs");
 
-                showChangeLogsBtn.onClick();
+                CurrentChangesBtn.onClick();
                 sysadmin_database_PageContainer.layout();
             });
 </script>

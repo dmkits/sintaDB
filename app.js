@@ -510,27 +510,40 @@ app.get("/sysadmin/database", function (req, res) {
 });
 
 app.get("/sysadmin/database/change_log", function (req, res) {
-    log.info("/sysadmin/database/change_log",req.params," ", JSON.stringify(req.query));
+    log.info("/sysadmin/database/change_log", req.params, " ", JSON.stringify(req.query));
 
-    var outData={};
-    outData.columns=[];
-    outData.items=[];
+    var outData = {};
+    outData.columns = [];
+    //outData.items=[];
     outData.columns.push(
-         { "data":"changeID", "name":"changeID", "width":100, "type":"text"}
-        ,{ "data":"changeDatetime", "name":"changeDatetime", "width":200, "type":"text"}
-        ,{ "data":"changeObj", "name":"changeObj", "width":100, "type":"text"}
-        ,{ "data":"changeVal", "name":"changeVal", "width":300, "type":"text"}
-
+        {"data": "ID", "name": "changeID", "width": 100, "type": "text"}
+        , {"data": "CHANGE_DATETIME", "name": "changeDatetime", "width": 200, "type": "text"}
+        , {"data": "CHANGE_OBJ", "name": "changeObj", "width": 100, "type": "text"}
+        , {"data": "CHANGE_VAL", "name": "changeVal", "width": 300, "type": "text"}
+        , {"data": "APPLIED_DATETIME", "name": "appliedDatetime", "width": 300, "type": "text"}
     );
-    var logFilesArr=JSON.parse(fs.readFileSync('./dbConfig/dbModel.json','utf-8'));
-
-    for(var i in logFilesArr){
-         var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/'+logFilesArr[i]+'.json','utf-8'));
-         for (var j in jsonFile){
-             outData.items.push(jsonFile[j]);
-         }
-    }
-        res.send(outData);
+    database.checkIfChangeLogExists(function (err, exist) {
+        if (err && (err.code == "ER_NO_SUCH_TABLE")) {
+            outData.message = "Change Log doesn't exists";
+            res.send(outData);
+            return;
+        }
+        else if (err) {
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        database.getChangeLog(function (err, result) {
+            if (err) {
+                console.log("getChangeLog err=", err);
+                outData.error = err.message;
+                res.send(outData);
+                return;
+            }
+            outData.items = result;
+            res.send(outData);
+        });
+    });
 });
 
 app.get("/sysadmin/database/current_changes", function (req, res) {
@@ -548,12 +561,8 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
         , {"data": "message", "name": "message", "width": 200, "type": "text"}
     );
     database.checkIfChangeLogExists(function(err, existsBool) {
-        if (err) {
-            outData.error = err.message;
-            res.send(outData);
-            return;
-        }
-        if (!existsBool) {
+        if (err&& (err.code=="ER_NO_SUCH_TABLE")) {     console.log("err.code=ER_NO_SUCH_TABLE");
+            outData.noTable = true;
             var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
             for (var i in logFilesArr) {
                 var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + logFilesArr[i] + '.json', 'utf-8'));
@@ -564,17 +573,21 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
                 }
             }
             res.send(outData);
-            return;
         }
-        var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
-        matchLogFilesArray(logFilesArr, outData, 0, function (outData) {
+        else if (err) {
+            outData.error = err.message;
             res.send(outData);
-        });
+        }else {                                 console.log("current_changes exists ChangeLog");
+            var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
+            matchLogFilesArray(logFilesArr, outData, 0, function (outData) {
+                res.send(outData);
+            });
+        }
     });
 });
 
-function matchLogFilesArray(logFilesArr,outData,ind,callback){
-    var file = logFilesArr[ind];
+function matchLogFilesArray(logFilesArr,outData,ind,callback){    console.log("matchLogFilesArray");
+    var file = logFilesArr[ind];   console.log("file=",file);
     if (!file) {
         callback(outData);
         return;
@@ -585,8 +598,8 @@ function matchLogFilesArray(logFilesArr,outData,ind,callback){
     });
 }
 
-function matchLogData(logsData, outData, ind, callback){
-    var logData = logsData[ind];
+function matchLogData(logsData, outData, ind, callback){   console.log("matchLogData");
+    var logData = logsData?logsData[ind]:null;        console.log("logData=",logData);
     if (!logData) {
         callback(outData);
         return;
@@ -594,8 +607,7 @@ function matchLogData(logsData, outData, ind, callback){
     database.checkIfChangeLogIDExists(logData.changeID, function (err, existsBool) {
         if (err) {
             outData.error = err.message;
-            res.send(outData);
-            matchLogData(null,outData);
+            matchLogData(null, outData, ind+1, callback);
         }
         if (!existsBool) {
             logData.type = "new";
@@ -607,8 +619,7 @@ function matchLogData(logsData, outData, ind, callback){
             database.matchChangeLogFields(logData,function(err, identicalBool){
                 if (err) {              console.log("matchChangeLogFields err=",err);
                     outData.error = err.message;
-                    res.send(outData);
-                    return
+                    matchLogData(logsData, outData, ind+1, callback);
                 }
                 if(!identicalBool){
                     logData.type = "warning";
@@ -623,7 +634,6 @@ function matchLogData(logsData, outData, ind, callback){
     });
 }
 
-
 app.post("/sysadmin/database/apply_changes", function (req, res) {
     log.info('/sysadmin/database/apply_changes');
 var outData={};
@@ -633,41 +643,8 @@ var outData={};
     //var CHANGE_OBJ=req.body.changeObj;
     var CHANGE_VAL=req.body.changeVal;
 
-    database.checkIfChangeLogExists(function(err, existsBool){
-        if(err){
-            outData.error=err.message;
-            res.send(outData);
-            return;
-        }
-        if(existsBool) {
-            database.checkIfChangeLogIDExists(ID, function (err, existsBool) {
-                if (err) {
-                    outData.error = err.message;
-                    res.send(outData);
-                    return;
-                }
-                if (existsBool) {
-                    outData.error = "Change log with ID is already exists";
-                    res.send(outData);
-                    return;
-                }
-                database.executeQuery(CHANGE_VAL, function (err) {
-                    if (err) {
-                        outData.error = err.message;
-                        res.send(outData);
-                        return;
-                    }
-                    database.writeToChangeLog(req.body, function (err) {
-                        if (err) {
-                            outData.error = err.message;
-                            res.send(outData);
-                            return;
-                        }
-                        res.send({success:'ok'});
-                    })
-                })
-            })
-        }else{
+    database.checkIfChangeLogExists(function(err, existsBool) {
+        if (err && (err.code == "ER_NO_SUCH_TABLE")) {
             database.executeQuery(CHANGE_VAL, function (err) {
                 if (err) {
                     outData.error = err.message;
@@ -680,10 +657,40 @@ var outData={};
                         res.send(outData);
                         return;
                     }
-                    res.send({success:'ok'});
+                })
+            });
+        } else if (err) {
+            outData.error = err.message;
+            res.send(outData);
+            return;
+        }
+        database.checkIfChangeLogIDExists(ID, function (err, existsBool) {
+            if (err) {
+                outData.error = err.message;
+                res.send(outData);
+                return;
+            }
+            if (existsBool) {
+                outData.error = "Change log with ID is already exists";
+                res.send(outData);
+                return;
+            }
+            database.executeQuery(CHANGE_VAL, function (err) {
+                if (err) {
+                    outData.error = err.message;
+                    res.send(outData);
+                    return;
+                }
+                database.writeToChangeLog(req.body, function (err) {
+                    if (err) {
+                        outData.error = err.message;
+                        res.send(outData);
+                        return;
+                    }
+                    res.send({success: 'ok'});
                 })
             })
-        }
+        })
     });
 });
 
@@ -695,4 +702,5 @@ server.listen(port, function (err) {
     console.log("server runs on port " + port);
     log.info("server runs on port " + port, new Date().getTime() - startTime);
 });
+
 log.info("end app", new Date().getTime() - startTime);

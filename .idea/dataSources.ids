@@ -40,6 +40,7 @@
     <schema name="" catalog="sample_sinta7"/>
     <schema name="" catalog="sample_sinta9"/>
     <schema name="" catalog="sinta3"/>
+    <schema name="" catalog="sinta_sample"/>
     <schema name="" catalog="sys"/>
     <schema name="" catalog="test1"/>
     <table name="CHARACTER_SETS" schema="" catalog="information_schema" type="SYSTEM VIEW">
@@ -3979,5 +3980,26 @@
         <parameter name="" sqlType="TINYINT UNSIGNED" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
       </prototype>
     </procedure>
+  </data-source>
+  <data-source name="MySQL - sinta_temp@localhost" uuid="0e2e9350-bb52-4b06-b1cf-1dd1a44890b9">
+    <database-info product="MySQL" version="5.7.18-0ubuntu0.16.10.1" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.40 ( Revision: 402933ef52cad9aa82624e80acbea46e3a701ce6 )">
+      <extra-name-characters>#@</extra-name-characters>
+      <identifier-quote-string>`</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact"/>
+    <schema name="" catalog="sinta_temp"/>
+    <table name="change_log" schema="" catalog="sinta_temp" type="TABLE">
+      <column name="ID" sqlType="VARCHAR" precision="64" scale="0" nullable="false" jdbcType="12"/>
+      <column name="CHANGE_DATETIME" sqlType="TIMESTAMP" precision="19" scale="0" nullable="false" jdbcType="93" version="true"/>
+      <column name="CHANGE_OBJ" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <column name="CHANGE_VAL" sqlType="VARCHAR" precision="20000" scale="0" nullable="false" jdbcType="12"/>
+      <column name="APPLIED_DATETIME" sqlType="TIMESTAMP" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <primary-key name="PRIMARY" columns="ID"/>
+    </table>
+    <table name="dir_units" schema="" catalog="sinta_temp" type="TABLE">
+      <column name="ID" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
+      <column name="NAME" sqlType="VARCHAR" precision="200" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="ID"/>
+    </table>
   </data-source>
 </component>

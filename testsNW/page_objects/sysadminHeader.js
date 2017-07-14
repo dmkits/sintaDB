@@ -9,6 +9,5 @@ module.exports = {
         user: '#sysadmin_ConnUserName',
         StartUpParamsBtn: '#display_startup_params',
         btnDatabase: "#btnDatabase"
-        //,ReportsConfigBtn:'#display_reports_config'
     }
 };

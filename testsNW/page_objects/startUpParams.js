@@ -1,20 +1,94 @@
+var fs=require('fs');
+
+//var dbConfig=JSON.parse(fs.readFileSync("./test.cfg","utf-8"));  //console.log(dbConfig)
+
 var startUpParamsCommands = {
-    resetDBConfig: function () {
+
+    setInitialDBConfig: function (file) {
+        var dbConfig=JSON.parse(fs.readFileSync("./test.cfg","utf-8"));
+        //var dbConfig=JSON.parse(fs.readFileSync(file,"utf-8"));
         var instance=this;
-        return instance.waitForElementVisible('@dbHostInput')
+            instance.waitForElementVisible('@dbHostInput')
+                .waitForElementVisible('@dbNameInput')
+                .waitForElementVisible('@dbUserInput')
+                .waitForElementVisible('@dbPasswordInput')
+                .clearValue('@dbHostInput')
+                .setValue('@dbHostInput',dbConfig.host)
+                .clearValue('@dbNameInput')
+                .setValue('@dbNameInput', dbConfig.database)
+                .clearValue('@dbUserInput')
+                .setValue('@dbUserInput',  dbConfig.user)
+                .clearValue('@dbPasswordInput')
+                .setValue('@dbPasswordInput',  dbConfig.password)
+                .click('@StoreAndReconnectBtn');
+        return instance;
+    },
+
+    createTempDB: function () {
+        var instance=this;
+        instance.waitForElementVisible('@dbHostInput')
             .waitForElementVisible('@dbNameInput')
             .waitForElementVisible('@dbUserInput')
             .waitForElementVisible('@dbPasswordInput')
             .clearValue('@dbHostInput')
-            .setValue('@dbHostInput', 'localhost')
+            .setValue('@dbHostInput',"localhost")
             .clearValue('@dbNameInput')
-            .setValue('@dbNameInput', 'sample_sinta')
+            .setValue('@dbNameInput', "sinta_temp")     //create temp DB sinta temp;
             .clearValue('@dbUserInput')
-            .setValue('@dbUserInput', 'user')
+            .setValue('@dbUserInput',  "user")
             .clearValue('@dbPasswordInput')
-            .setValue('@dbPasswordInput', 'user')
+            .setValue('@dbPasswordInput',  "user")
+            .click('@createDBBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@createDBResultField')
+            .assert.containsText('@createDBResultField',"created")
             .click('@StoreAndReconnectBtn');
+
+        return instance;
     },
+
+    dropTempDBAndReconnect: function () {
+        var instance=this;
+        instance.waitForElementVisible('@dbHostInput')
+            .waitForElementVisible('@dbNameInput')
+            .waitForElementVisible('@dbUserInput')
+            .waitForElementVisible('@dbPasswordInput')
+            .clearValue('@dbHostInput')
+            .setValue('@dbHostInput',"localhost")
+            .clearValue('@dbNameInput')
+            .setValue('@dbNameInput', "sinta_temp")     //create temp DB sinta temp;
+            .clearValue('@dbUserInput')
+            .setValue('@dbUserInput',  "user")
+            .clearValue('@dbPasswordInput')
+            .setValue('@dbPasswordInput',"user")
+            .click('@dropDBBtn')
+            .authorizeAsAdmin()
+            .waitForElementVisible('@dropDBResultField')
+            .assert.containsText('@dropDBResultField',"dropped")
+            .setInitialDBConfig();
+           //.click('@StoreAndReconnectBtn')
+
+        return instance;
+    },
+
+    resetTempDBConfig: function () {
+        var instance=this;
+        instance.waitForElementVisible('@dbHostInput')
+            .waitForElementVisible('@dbNameInput')
+            .waitForElementVisible('@dbUserInput')
+            .waitForElementVisible('@dbPasswordInput')
+            .clearValue('@dbHostInput')
+            .setValue('@dbHostInput','localhost')
+            .clearValue('@dbNameInput')
+            .setValue('@dbNameInput', 'sinta_temp')
+            .clearValue('@dbUserInput')
+            .setValue('@dbUserInput',  'user')
+            .clearValue('@dbPasswordInput')
+            .setValue('@dbPasswordInput',  'user')
+            .click('@StoreAndReconnectBtn');
+        return instance;
+    },
+
     submitDialog: function (dialog) {
         var instance=this;
         return instance.waitForElementVisible(dialog)
@@ -22,6 +96,7 @@ var startUpParamsCommands = {
             .click(dialog+'_submitBtn')
             .waitForElementNotVisible(dialog);
     },
+
     cancelDialog: function (dialog) {
         var instance=this;
         return instance.waitForElementVisible(dialog+'_cancelBtn')
@@ -37,6 +112,7 @@ var startUpParamsCommands = {
             .waitForElementVisible('@authAdminDialog')
             .assert.valueContains('@authAdminDialog_AdminPas', '')
     },
+
     authorizeAsAdmin:function(){
         var instance=this;
         return instance.waitForElementVisible('@authAdminDialog')
@@ -49,12 +125,14 @@ var startUpParamsCommands = {
             .click('@authAdminDialog_submitBtn')
             .waitForElementNotVisible('@authAdminDialog');
     },
+
     assertBackupDialogIsEmpty:function(){
         var instance=this;
         return instance.waitForElementVisible('@backupDialog')
             .waitForElementVisible('@backupFileName')
             .assert.valueContains('@backupFileName', '')
     },
+
     assertRestoreDialogIsEmpty:function(){
         var instance=this;
         return instance.waitForElementVisible('@restoreDialog')
