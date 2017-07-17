@@ -99,17 +99,6 @@ module.exports = {
         currentChangesBtn: '#current_changes',
         changeLogBtn: '#change_log',
 
-        //totalRowLabel: {
-        //    selector: "//*[@id='sysadmin_database_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]",
-        //    locateStrategy: 'xpath'
-        //},
-        //
-        //totalRowValueInput: {
-        //    selector: "//*[@id='sysadmin_database_ContentPaneDetailContainer']//label[contains(text(), 'ИТОГО строк: ')]/ancestor::td//input[@type='hidden']",
-        //    locateStrategy: 'xpath'
-        //},
-
-
         currentChangesTable:{
             selector: "//*[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']",
             locateStrategy: 'xpath'
@@ -130,11 +119,9 @@ module.exports = {
 function getTableID(table, callback) {
     if (table == '@currentChangesTable') {
         callback('sysadmin_database_Tabledatabasecurrent_changes');
-        //return;
     }
     if (table == '@changeLogTable') {
         callback('sysadmin_database_Tabledatabasechange_log');
-        // return;
     }
 }
 

@@ -1,28 +1,6 @@
 var fs=require('fs');
 
-//var dbConfig=JSON.parse(fs.readFileSync("./test.cfg","utf-8"));  //console.log(dbConfig)
-
 var startUpParamsCommands = {
-
-    setInitialDBConfig: function (file) {
-        var dbConfig=JSON.parse(fs.readFileSync("./test.cfg","utf-8"));
-        //var dbConfig=JSON.parse(fs.readFileSync(file,"utf-8"));
-        var instance=this;
-            instance.waitForElementVisible('@dbHostInput')
-                .waitForElementVisible('@dbNameInput')
-                .waitForElementVisible('@dbUserInput')
-                .waitForElementVisible('@dbPasswordInput')
-                .clearValue('@dbHostInput')
-                .setValue('@dbHostInput',dbConfig.host)
-                .clearValue('@dbNameInput')
-                .setValue('@dbNameInput', dbConfig.database)
-                .clearValue('@dbUserInput')
-                .setValue('@dbUserInput',  dbConfig.user)
-                .clearValue('@dbPasswordInput')
-                .setValue('@dbPasswordInput',  dbConfig.password)
-                .click('@StoreAndReconnectBtn');
-        return instance;
-    },
 
     createTempDB: function () {
         var instance=this;
@@ -43,31 +21,60 @@ var startUpParamsCommands = {
             .waitForElementVisible('@createDBResultField')
             .assert.containsText('@createDBResultField',"created")
             .click('@StoreAndReconnectBtn');
-
         return instance;
     },
 
     dropTempDBAndReconnect: function () {
         var instance=this;
-        instance.waitForElementVisible('@dbHostInput')
-            .waitForElementVisible('@dbNameInput')
-            .waitForElementVisible('@dbUserInput')
-            .waitForElementVisible('@dbPasswordInput')
-            .clearValue('@dbHostInput')
-            .setValue('@dbHostInput',"localhost")
-            .clearValue('@dbNameInput')
-            .setValue('@dbNameInput', "sinta_temp")     //create temp DB sinta temp;
-            .clearValue('@dbUserInput')
-            .setValue('@dbUserInput',  "user")
-            .clearValue('@dbPasswordInput')
-            .setValue('@dbPasswordInput',"user")
-            .click('@dropDBBtn')
-            .authorizeAsAdmin()
-            .waitForElementVisible('@dropDBResultField')
-            .assert.containsText('@dropDBResultField',"dropped")
-            .setInitialDBConfig();
-           //.click('@StoreAndReconnectBtn')
+        var dbConfig;
+        this.api.pause(2000);
 
+        fs.unlink('./test.cfg', function (err) {              //dele file
+            if (err && err.code == 'ENOENT') {
+                // file doens't exist
+                console.info("File doesn't exist, won't remove it.");
+            } else if (err) {
+                // maybe we don't have enough permission
+                console.error("Error occurred while trying to remove file");
+            }
+            fs.rename('./test_temp_copy.cfg', './test.cfg', function (err) {
+                if (err) console.log('ERROR: ' + err);
+                dbConfig = JSON.parse(fs.readFileSync("./test.cfg", "utf-8"));
+            })
+        });
+
+        this.api.perform(function () {
+            instance.waitForElementVisible('@dbHostInput')
+                .waitForElementVisible('@dbNameInput')
+                .waitForElementVisible('@dbUserInput')
+                .waitForElementVisible('@dbPasswordInput')
+                .clearValue('@dbHostInput')
+                .setValue('@dbHostInput', "localhost")
+                .clearValue('@dbNameInput')
+                .setValue('@dbNameInput', "sinta_temp")     //create temp DB sinta_temp;
+                .clearValue('@dbUserInput')
+                .setValue('@dbUserInput', "user")
+                .clearValue('@dbPasswordInput')
+                .setValue('@dbPasswordInput', "user")
+                .click('@dropDBBtn')
+                .authorizeAsAdmin()
+                .waitForElementVisible('@dropDBResultField')
+                .assert.containsText('@dropDBResultField', "dropped")
+
+                .waitForElementVisible('@dbHostInput')
+                .waitForElementVisible('@dbNameInput')
+                .waitForElementVisible('@dbUserInput')
+                .waitForElementVisible('@dbPasswordInput')
+                .clearValue('@dbHostInput')
+                .setValue('@dbHostInput', dbConfig.host)
+                .clearValue('@dbNameInput')
+                .setValue('@dbNameInput', dbConfig.database)
+                .clearValue('@dbUserInput')
+                .setValue('@dbUserInput', dbConfig.user)
+                .clearValue('@dbPasswordInput')
+                .setValue('@dbPasswordInput', dbConfig.password)
+                .click('@StoreAndReconnectBtn');
+        });
         return instance;
     },
 

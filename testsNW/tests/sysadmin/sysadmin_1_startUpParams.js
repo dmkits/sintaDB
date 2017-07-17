@@ -18,14 +18,19 @@ function deleteTestBackUpFile() {
 
 module.exports= {
 
-    '@disabled': true,
+    //'@disabled': true,
 
+    before: function (browser) {
+        fs.createReadStream('./test.cfg').pipe(fs.createWriteStream('./test_temp_copy.cfg'));
+    },
 
     after : function(browser) {
         deleteTestBackUpFile();
     },
 
     'Sysadmin Header If  All Elements Visible Tests': function (browser) {
+
+        browser.pause(2000);
 
         var mainHeader = browser.page.sysadminHeader();
         mainHeader
@@ -185,6 +190,7 @@ module.exports= {
             .authorizeAsAdmin()
             .assert.visible("@backupDialog")
             .assert.visible("@backupFileName")
+            .assertBackupDialogIsEmpty()                ///////////////
             .setValue("@backupFileName","sinta")
             .submitDialog('@backupDialog')
             .waitForElementVisible('@backupDBResultField')
@@ -195,6 +201,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
+            .assertRestoreDialogIsEmpty()                                                                   ///
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
             .submitDialog('@restoreDialog')
@@ -213,7 +220,8 @@ module.exports= {
         startUpParams.click('@restoreBtn')
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
-            .waitForElementVisible('@restoreDialog')
+            .waitForElementVisible('@restoreDialog')     ////////
+            .assertRestoreDialogIsEmpty()
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
             .submitDialog('@restoreDialog')
@@ -224,6 +232,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
+            .assertRestoreDialogIsEmpty()       ///////////
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
             .submitDialog('@restoreDialog')
@@ -236,6 +245,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
+            .assertRestoreDialogIsEmpty()                                                   ///////
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","fail0000")
             .submitDialog('@restoreDialog')
@@ -247,6 +257,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
+            .assertBackupDialogIsEmpty()                                                                 ///
             .clearValue("@backupFileName")
             .setValue("@backupFileName","testBackup")
             .submitDialog('@backupDialog')
@@ -258,6 +269,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
+            .assertBackupDialogIsEmpty()                                                   //////
             .clearValue("@backupFileName")
             .setValue("@backupFileName","sinta")
             .submitDialog('@backupDialog')
@@ -266,13 +278,6 @@ module.exports= {
             .waitForElementVisible('@backupDBResultField')
             .assert.containsText('@backupDBResultField', 'backup saved')
             .dropTempDBAndReconnect();
-            //.waitForElementPresent('@dropDBBtn')
-            //.click('@dropDBBtn')
-            //.assertAdminDialogIsEmpty()
-            //.authorizeAsAdmin()
-            //.waitForElementVisible('@dropDBResultField')
-            //.assert.containsText('@dropDBResultField', 'dropped!')
-            //.setInitialDBConfig();
 
         browser.end();
     }
