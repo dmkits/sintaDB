@@ -30,21 +30,33 @@ module.exports.databaseConnection=function(callback){  console.log("databaseConn
 
     if(connection) {                         console.log("if(connection)");
         connection.end(function (err) {
-            connection=null;
-            if("databaseConnection err=",err) console.log(err);
-            return;
+                if (err) {                  if("connection.end err=",err)
+                    connection=null;
+                    callback(err.message);
+                    return;
+            }
+            connection = mysql.createConnection(dbConfig);
+            connection.connect(function (err) {
+                if (err) {                     if("databaseConnection connrct err=",err) console.log(err);
+                    connection=null;
+                    callback(err.message);
+                    return;
+                }
+                callback(null,"connected");
+            });
+        });
+    }else {
+        connection = mysql.createConnection(dbConfig);
+        connection.connect(function (err) {
+            if (err) {
+                if ("databaseConnection connrct err=", err) console.log(err);
+                connection = null;
+                callback(err.message);
+                return;
+            }
+            callback(null, "connected");
         });
     }
-    connection=null;
-    connection = mysql.createConnection(dbConfig);
-    connection.connect(function (err) {
-          if (err) {                  if("databaseConnection connrct err=",err) console.log(err);
-              connection=null;
-              callback(err.message);
-              return;
-          }
-          callback(null,"connected");
-      });
 };
 module.exports.mySQLAdminConnection = function (connParams, callback) {   console.log("mySQLAdminConnection");
     if (connection) {

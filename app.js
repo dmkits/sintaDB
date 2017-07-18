@@ -517,8 +517,8 @@ app.get("/sysadmin/database/change_log", function (req, res) {
     //outData.items=[];
     outData.columns.push(
         {"data": "ID", "name": "changeID", "width": 100, "type": "text"}
-        , {"data": "CHANGE_DATETIME", "name": "changeDatetime", "width": 200, "type": "text"}
-        , {"data": "CHANGE_OBJ", "name": "changeObj", "width": 100, "type": "text"}
+        , {"data": "CHANGE_DATETIME", "name": "changeDatetime", "width": 180, "type": "text"}
+        , {"data": "CHANGE_OBJ", "name": "changeObj", "width": 120, "type": "text"}
         , {"data": "CHANGE_VAL", "name": "changeVal", "width": 300, "type": "text"}
         , {"data": "APPLIED_DATETIME", "name": "appliedDatetime", "width": 300, "type": "text"}
     );
@@ -559,6 +559,16 @@ function getDBModel(){
     }
     return outData;
 }
+function sortArray(arr){
+
+    function compareBychangeDatetime(a, b) {
+        if (a.changeDatetime > b.changeDatetime) return 1;
+        if (a.changeDatetime < b.changeDatetime) return -1;
+    }
+
+    arr.sort(compareBychangeDatetime);
+    return arr;
+}
 app.get("/sysadmin/database/current_changes", function (req, res) {
     log.info("/sysadmin/database/current_changes", req.params, " ", JSON.stringify(req.query));
 
@@ -566,7 +576,7 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
     outData.columns = [];
     outData.items = [];
     outData.columns.push(
-          {"data": "changeID", "name": "changeID", "width": 100, "type": "text"}
+          {"data": "changeID", "name": "changeID", "width": 185, "type": "text"}
         , {"data": "changeDatetime", "name": "changeDatetime", "width": 200, "type": "text"}
         , {"data": "changeObj", "name": "changeObj", "width": 100, "type": "text"}
         , {"data": "changeVal", "name": "changeVal", "width": 300, "type": "text"}
@@ -576,7 +586,10 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
     database.checkIfChangeLogExists(function(err, existsBool) {
         if (err&& (err.code=="ER_NO_SUCH_TABLE")) {     console.log("err.code=ER_NO_SUCH_TABLE");
             outData.noTable = true;
-            outData.items=getDBModel();
+          //  outData.items=getDBModel();
+            var arr=getDBModel();
+            var sortArr=sortArray(arr);
+            outData.items=sortArr;
             res.send(outData);
         }
         else if (err) {
@@ -591,8 +604,8 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
     });
 });
 
-function matchLogFilesArray(logFilesArr,outData,ind,callback){    console.log("matchLogFilesArray");
-    var file = logFilesArr[ind];   console.log("file=",file);
+function matchLogFilesArray(logFilesArr,outData,ind,callback){
+    var file = logFilesArr[ind];
     if (!file) {
         callback(outData);
         return;
@@ -603,8 +616,8 @@ function matchLogFilesArray(logFilesArr,outData,ind,callback){    console.log("m
     });
 }
 
-function matchLogData(logsData, outData, ind, callback){   console.log("matchLogData");
-    var logData = logsData?logsData[ind]:null;        console.log("logData=",logData);
+function matchLogData(logsData, outData, ind, callback){
+    var logData = logsData?logsData[ind]:null;
     if (!logData) {
         callback(outData);
         return;
@@ -622,7 +635,7 @@ function matchLogData(logsData, outData, ind, callback){   console.log("matchLog
 
         } else {
             database.matchChangeLogFields(logData,function(err, identicalBool){
-                if (err) {              console.log("matchChangeLogFields err=",err);
+                if (err) {
                     outData.error = err.message;
                     matchLogData(logsData, outData, ind+1, callback);
                 }
