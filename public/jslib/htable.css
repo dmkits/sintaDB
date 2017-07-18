@@ -67,8 +67,12 @@
 
     float: left;
     line-height: 10px;
-    margin: 3px 3px 3px 3px;
+    margin-left: 3px;
+    margin-top: 3px;
     z-index: 100;
+}
+.changeTypeAccent {
+    font-weight: bold;
 }
 .changeTypeC {
     border: 1px solid #bbb;
@@ -80,7 +84,8 @@
 
     float: left;
     line-height: 10px;
-    margin: 3px 3px 3px 3px;
+    margin-left: 3px;
+    margin-top: 3px;
     z-index: 100;
 }
 .changeTypeC:hover {

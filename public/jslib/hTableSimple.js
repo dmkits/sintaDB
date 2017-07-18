@@ -2,7 +2,7 @@
  * Created by dmkits on 20.04.16.
  * Refactor by dmkits 15.02.17.
  */
-Handsontable.cellTypes['text'].editor.prototype.setValue = function(value) {
+Handsontable.cellTypes['text'].editor.prototype.setValue = function(value) {                                            //console.log("Handsontable.cellTypes['text'].editor.prototype.setValue ",value);
     var cellPropFormat = this.cellProperties["format"];
     if (this.cellProperties["type"]=="numeric"&&cellPropFormat&&cellPropFormat.indexOf('%')>=0){
         var val = ''; if(value) val = Math.round(value.replace(',','.')*100)+'%'; this.TEXTAREA.value= val;
@@ -27,20 +27,21 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
     return declare("HTableSimple", [ContentPane], {
         handsonTable: null,
         htColumns: [], htVisibleColumns: [],
-        htData: [],
+        htData: [], htDataError:null,
         htSelection:null,
         //showIdentifiers:false,
         readOnly: true,
         wordWrap: false,
         persistentState: false,
         popupMenuItems: {},
-        tableHeaderContent: undefined,
+        tableHeaderAddedElements: undefined,
         constructor: function(args,parentName){
             this.srcNodeRef = document.getElementById(parentName);
             this.domNode = this.srcNodeRef;
             this.htColumns= [];/*[ { data:<data prop>, name, readOnly, type, width}, ...]*/
             this.htVisibleColumns= [];
             this.htData= []; /*[ {prop:value,...}, ...]*/
+            this.htDataError= null;
             //this.showIdentifiers=false;
             this.readOnly= true;
             this.wordWrap= false;
@@ -57,7 +58,12 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                 if(colItem["visible"]!==false) {
                     var newColData = {};
                     visibleColumns[vc++]= newColData;
-                    for(var item in colItem) newColData[item]=colItem[item];
+                    for(var item in colItem) {
+                        newColData[item]=colItem[item];
+                        if (item==="type"&&colItem.type==="autocomplete"&&colItem.source===undefined) {
+                            newColData.source=[]; //newColData.source.push("");
+                        }
+                    }
                 }
             }
             return visibleColumns;
@@ -70,8 +76,14 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
             this.htColumns = newDataColumns;
             this.htVisibleColumns= this.getVisibleColumnsFrom(newDataColumns);
         },
+        /*
+         * data = { identifier:"...", columns:[...], items:[...] }
+         * if no data table data setted to { identifier:null, columns:[], items:[] }; }
+         * if no data.items data.items setted to []
+         */
         setData: function(data) {                                                                                       console.log("HTableSimple setData ",data);
-            if (!data) { data={ identifier:null, columns:[], items:[] }; }
+            if (!data) { data={ identifier:null, columns:[], items:[], error:null }; }
+            if(data.error) { this.htDataError=data.error; } else this.htDataError=null;
             if(data.identifier) { this.handsonTable.rowIDName=data.identifier; }
             this.setDataColumns(data.columns);
             if(!data.items) {
@@ -79,6 +91,19 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                 return;
             }
             this.htData = data.items;
+            for(var c=0;c<this.htVisibleColumns.length;c++){
+                var visColData=this.htVisibleColumns[c];
+                if (visColData.type==="autocomplete") {
+                    visColData.sourceValues={};
+                    for(var r=0;r<this.htData.length;r++) {
+                        var value=this.htData[r][visColData.data];
+                        if (!visColData.sourceValues[value]){
+                            visColData.sourceValues[value]=true;
+                            visColData.source.push(value);
+                        }
+                    }
+                }
+            }
         },
         getData: function(){
             return this.htData;
@@ -86,8 +111,11 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
         getRowIDName: function(){
             return this.handsonTable.rowIDName;
         },
-        getColumns: function(){                                                                                         console.log("HTableSimple getColumns ",this.htColumns);
+        getColumns: function(){                                                                                         //console.log("HTableSimple getColumns ",this.htColumns);
             return this.htColumns;
+        },
+        getDataError: function(){
+            return this.htDataError;
         },
         getVisibleColumns: function(){ return this.htVisibleColumns; },
         createHandsonTable: function(){
@@ -162,7 +190,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                     parent.onSelect(selection[firstItem], selection);
                 }
             });
-            //this.handsonTable.updateSettings({fillHandle: false});//it's for use fillHandle in childrens
+            this.handsonTable.updateSettings({fillHandle: false});//it's for use fillHandle in childrens
             this.handsonTable.getContent= function(){
                 return this.getSourceData();
             };
@@ -180,23 +208,28 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
         setHT: function(params){
             this.handsonTable.updateSettings(params);
         },
-        setAddingHeaderRow: function(addingHeaderContent){
-            if (addingHeaderContent) this.tableHeaderContent=addingHeaderContent;
-            var thisInstance=this, hInstance= this.getHandsonTable();
+        setAddingHeaderRow: function(addingHeaderElements){
+            if (addingHeaderElements) this.tableHeaderAddedElements=addingHeaderElements;
+            var hInstance= this.getHandsonTable();
             hInstance.updateSettings({
                 afterRender: function () {
                     var theads=hInstance.rootElement.getElementsByTagName('thead');                                     //console.log("HTableSimple afterRender theads=",theads);
+                    var div= document.createElement("div");
                     for(var theadInd=0;theadInd<theads.length;theadInd++){
                         var thead= theads[theadInd];
                         var newTR = document.createElement("tr");
                         var newTH=document.createElement("th");
                         newTR.appendChild(newTH);
                         var tr=thead.getElementsByTagName('tr')[0];
-                        thead.insertBefore(newTR,tr);
-                        newTH.setAttribute("colspan",tr.childNodes.length.toString());
-                        newTH.innerHTML=thisInstance.tableHeaderContent;
-                        if (tr.firstChild) tr.firstChild.removeAttribute("colspan");
+                        if(theadInd<=1) {
+                            thead.insertBefore(newTR, tr);
+                            newTH.setAttribute("colspan", tr.childNodes.length.toString());
+                            if(theadInd==1)newTH.appendChild(div);
+                            if (tr.firstChild) tr.firstChild.removeAttribute("colspan");
+                        }
                     }
+                    for(var eName in addingHeaderElements)
+                        div.appendChild(addingHeaderElements[eName]);
                 }
             });
         },
@@ -213,6 +246,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
         //    if (disabled) this.handsonTable
         //},
         /*
+         * newdata = { identifier:"...", columns:[...], items:[...] }
+         * if newdata.items=null table data content cleared (columns not clreared)
          * calls on load/set/reset data to table or on change data after store
          * params= { callOnUpdateContent=true/false, resetSelection=true/false }
          * default params.resetSelection!=false
@@ -228,8 +263,24 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                 );
                 if(params&&params.resetSelection!==false) this.resetSelection();
             } else {//clearTableDataContent
-                this.clearContent();
+                this.clearContent(params);
             }
+            if (params&&params.callOnUpdateContent===false) return;
+            this.onUpdateContent();
+        },
+        setContent: function(newdata) {                                                                                 //console.log("HTableSimple setContent newdata=", newdata);
+            this.updateContent(newdata);
+        },
+        /*
+         * params= { callOnUpdateContent=true/false, resetSelection=true/false }
+         * default params.resetSelection!=false
+         * if params.resetSelection==false not call resetSelection
+         * default params.callOnUpdateContent!=false
+         * if params.callOnUpdateContent==false not call onUpdateContent
+         */
+        clearContent: function(params) {                                                                                //console.log("HTableSimple clearContent");
+            if(params&&params.resetSelection!==false) this.setSelection(null,null);
+            this.handsonTable.updateSettings({columns:this.htVisibleColumns, data:[], comments:false, readOnly:true});
             if (params&&params.callOnUpdateContent===false) return;
             this.onUpdateContent();
         },
@@ -260,13 +311,6 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
             }
             this.setSelection( (newSelection)?newSelection[newSelectionFirstRowIndex]:null, newSelection);              //console.log("HTableSimple resetSelection END",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
         },
-        setContent: function(newdata) {                                                                                 //console.log("HTableSimple setContent newdata=", newdata);
-            this.updateContent(newdata);
-        },
-        clearContent: function() {                                                                                      //console.log("HTableSimple clearContent");
-            this.setSelection(null,null);
-            this.handsonTable.updateSettings({columns:this.htVisibleColumns, data:[], comments:false, readOnly:false});
-        },
         getContent: function(){
             return this.handsonTable.getContent();
         },
@@ -287,13 +331,18 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
             //TODO actions on/after update table content (after set/reset/reload/clear table content data)
         },
         /*
-         * params: {method=get/post , url, condition:string or object, duplexRequest:true/false, data, callUpdateContent:true/false}
+         * params: {method=get/post , url, condition:string or object, duplexRequest:true/false, dontClearContent:true/false, data, callUpdateContent:true/false}
          * if (duplexRequest=true) or (duplexRequest=undefined and no htColumns data),
          *     sends two requests: first request without parameters to get columns data without table data
          *     and second request with parameters from params.condition to get table data;
          * if duplexRequest=false, sends only one request to get table data with columns data.
+         * if clearContentBeforeLoad==true content clearing before send request for table data
          */
-        setContentFromUrl: function(params){
+        setContentFromUrl: function(params){                                                                            //console.log("HTableSimple setContentFromUrl ",params);
+            if (!params) {
+                this.updateContent(null);
+                return;
+            }
             if (!params.method) params.method="get";
             var duplexRequest= (params.duplexRequest===true)||( (!this.htColumns||this.htColumns.length==0)&&(params.duplexRequest!==false) );
             var instance = this;
@@ -305,33 +354,45 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                             if(!success||!result||result.error) {
                                 var errorMsg=(result&&result.error)?"Error=":"", error=(result&&result.error)?result.error:"";
                                 console.log("HTableSimple setContentFromUrl Request.getJSONData DATA ERROR!!! "+errorMsg,error);
+                                if(!result) result={};
+                                if(!result.columns) result.columns=instance.htColumns;
+                                if(!result.items) result.items=[];
                                 instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                                 return;
                             }
                             instance.updateContent(result, {callUpdateContent:params.callUpdateContent, resetSelection:false});
+                            var sCondition= JSON.stringify(params.condition);
+                            if(sCondition.length==0||sCondition==="{}") return; //if condition is Empty
                             Request.getJSONData({url:params.url, condition:params.condition, consoleLog:true}
                                 ,/*postaction*/function(success,result){
                                     if(!success) result=null;
                                     if(!success||!result||result.error) {
                                         var errorMsg=(result&&result.error)?"Error=":"", error=(result&&result.error)?result.error:"";
                                         console.log("HTableSimple setContentFromUrl Request.getJSONData DATA ERROR!!! "+errorMsg,error);
-                                        instance.updateContent({ columns:instance.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent});
+                                        if(!result) result={};
+                                        if(!result.columns) result.columns=instance.htColumns;
+                                        if(!result.items) result.items=[];
+                                        instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                                         return;
                                     }
-                                    instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                                    if (result.items&&result.items.length>0)
+                                        instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                                 });
                         });
                     return;
                 }
-                if(this.htData&&this.htData.length>0)
-                    instance.updateContent({ columns:this.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent, resetSelection:false});
+                if(this.htData&&this.htData.length>0 && params.clearContentBeforeLoad===true)
+                    instance.clearContent({callUpdateContent:params.callUpdateContent, resetSelection:false});
                 Request.getJSONData({url:params.url, condition:params.condition, consoleLog:true}
                     ,/*postaction*/function(success,result){
                         if(!success) result=null;
                         if(!success||!result||result.error) {
                             var errorMsg=(result&&result.error)?"Error=":"", error=(result&&result.error)?result.error:"";
                             console.log("HTableSimple setContentFromUrl Request.getJSONData DATA ERROR!!! "+errorMsg,error);
-                            instance.updateContent({ columns:instance.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent});
+                            if(!result) result={};
+                            if(!result.columns) result.columns=instance.htColumns;
+                            if(!result.items) result.items=[];
+                            instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                             return;
                         }
                         instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
@@ -349,6 +410,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                             return;
                         }
                         instance.updateContent(result, {callUpdateContent:params.callUpdateContent, resetSelection:false});
+                        var sCondition= JSON.stringify(params.condition);
+                        if(sCondition.length==0||sCondition==="{}") return; //if condition is Empty
                         Request.postJSONData({url:params.url, condition:params.condition, data:params.data, consoleLog:true},
                             /*postaction*/function(success,result){
                                 if(!success) result=null;
@@ -358,13 +421,14 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                                     instance.updateContent({ columns:instance.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent});
                                     return;
                                 }
-                                instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                                if (result.items&&result.items.length>0)
+                                    instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                             });
                     });
                 return;
             }
-            if(this.htData&&this.htData.length>0)
-                instance.updateContent({ columns:this.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent, resetSelection:false});
+            if(this.htData&&this.htData.length>0 && params.clearContentBeforeLoad===true)
+                instance.clearContent({callUpdateContent:params.callUpdateContent, resetSelection:false});
             Request.postJSONData({url:params.url, condition:params.condition, data:params.data, consoleLog:true},
                 /*postaction*/function(success,result){
                     if(!success) result=null;
@@ -376,6 +440,19 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
                     }
                     instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
                 });
+        },
+        /*
+         * params { callUpdateContent }
+         * do render table content
+         */
+        updateRowData: function(rowData, newRowData, params){
+            for(var itemName in newRowData) rowData[itemName]= newRowData[itemName];
+            this.handsonTable.render();
+            if (params&&params.callUpdateContent!=false) {
+                var rowsData=[]; rowsData[0]=rowData;
+                this.onUpdateContent({changedRows:rowsData});
+            }
+            return rowData;
         },
         setSelectedRow: function(rowIndex){
             this.handsonTable.selectCell(rowIndex,0,rowIndex,0);
@@ -402,6 +479,13 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
             for(var selItemIndex in this.htSelection)
                 return this.htSelection[selItemIndex];
         },
+        getSelectionLastRow:function(){
+            if(!this.htSelection) return null;
+            var selLastRowData=null;
+            for(var selItemIndex in this.htSelection)
+                selLastRowData= this.htSelection[selItemIndex];
+            return selLastRowData;
+        },
         getSelectedRowItemValue:function(itemName){
             if (!this.getSelectedRow) return null;
             return this.getSelectedRow[itemName];
@@ -424,15 +508,21 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"], function(d
             this.htSelection= selection;
             this.handsonTable.render();
         },
-
-        setMenuItem: function(itemID, itemName, callback){                                                              //console.log("HTableSimple setMenuItem",itemID,this.popupMenuItems,this);
+        /*
+         * callback= function(selRowsData, callbackParams, thisInstance)
+         */
+        setMenuItem: function(itemID, itemName, callbackParams, callback){                                              //console.log("HTableSimple setMenuItem",itemID,this.popupMenuItems,this);
+            var thisInstance= this;
             this.popupMenuItems[itemID]= {
                 name:itemName,
-                callback: function(key, options){
-                    var startRowIndex= options.start.row, endRowIndex= options.end.row;
+                callback: function(key, options){                                                                       //console.log("HTableSimple menuItem callback",key,options);
                     var selRowsData= [];
-                    for(var r=startRowIndex; r<=endRowIndex; r++) selRowsData[r]= this.getContentRow(r);
-                    callback(selRowsData);
+                    if(options.start&&options.end){
+                        var startRowIndex= options.start.row, endRowIndex= options.end.row;
+                        var selRowsData= [];
+                        for(var r=startRowIndex; r<=endRowIndex; r++) selRowsData[r]= this.getContentRow(r);
+                    }
+                    callback(selRowsData, callbackParams, thisInstance);
                 }
             };
             var popupMenuItems = this.popupMenuItems;

@@ -89,11 +89,8 @@ module.exports= {
             .click('@StartUpParamsBtn');
     },
         'Delete Test DB and reconnect': function(browser) {
-         //   browser.pause(2000);
             var startUpParams = browser.page.startUpParams();
             startUpParams.dropTempDBAndReconnect();
-
-
                 browser.end();
         }
 };

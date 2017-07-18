@@ -546,6 +546,19 @@ app.get("/sysadmin/database/change_log", function (req, res) {
     });
 });
 
+function getDBModel(){
+    var outData=[];
+    var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
+    for (var i in logFilesArr) {
+        var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + logFilesArr[i] + '.json', 'utf-8'));
+        for (var j in jsonFile) {
+            jsonFile[j].type = "new";
+            jsonFile[j].message = "not applied";
+            outData.push(jsonFile[j]);
+        }
+    }
+    return outData;
+}
 app.get("/sysadmin/database/current_changes", function (req, res) {
     log.info("/sysadmin/database/current_changes", req.params, " ", JSON.stringify(req.query));
 
@@ -563,15 +576,7 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
     database.checkIfChangeLogExists(function(err, existsBool) {
         if (err&& (err.code=="ER_NO_SUCH_TABLE")) {     console.log("err.code=ER_NO_SUCH_TABLE");
             outData.noTable = true;
-            var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
-            for (var i in logFilesArr) {
-                var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + logFilesArr[i] + '.json', 'utf-8'));
-                for (var j in jsonFile) {
-                    jsonFile[j].type = "new";
-                    jsonFile[j].message = "not applied";
-                    outData.items.push(jsonFile[j]);
-                }
-            }
+            outData.items=getDBModel();
             res.send(outData);
         }
         else if (err) {
@@ -633,32 +638,45 @@ function matchLogData(logsData, outData, ind, callback){   console.log("matchLog
         }
     });
 }
+///sysadmin/database/applyChange
 
-app.post("/sysadmin/database/apply_changes", function (req, res) {
-    log.info('/sysadmin/database/apply_changes');
-var outData={};
-    var ChangeLogData=req.body;
-    var ID=req.body.changeID;
-    //var CHANGE_DATETIME=req.body.changeDatetime;
-    //var CHANGE_OBJ=req.body.changeObj;
-    var CHANGE_VAL=req.body.changeVal;
+app.post("/sysadmin/database/applyChange", function (req, res) {
+    log.info('/sysadmin/database/applyChange');
+    var outData={};
+    outData.resultItem={};
+    var ID=req.body.CHANGE_ID;
 
+    var CHANGE_VAL;
+    var dbModelData=getDBModel();
+    var rowData;
+    for (var i in dbModelData){
+        if  (dbModelData[i].changeID==ID){
+            rowData=dbModelData[i];
+            CHANGE_VAL=dbModelData[i].changeVal;
+        }
+    }
+    outData.resultItem.CHANGE_ID=ID;
     database.checkIfChangeLogExists(function(err, existsBool) {
         if (err && (err.code == "ER_NO_SUCH_TABLE")) {
+
             database.executeQuery(CHANGE_VAL, function (err) {
                 if (err) {
                     outData.error = err.message;
                     res.send(outData);
                     return;
                 }
-                database.writeToChangeLog(req.body, function (err) {
+                database.writeToChangeLog(rowData, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
                         return;
                     }
+                    outData.resultItem.CHANGE_MSG='applied';
+                    res.send(outData);
                 })
             });
+            return;
+
         } else if (err) {
             outData.error = err.message;
             res.send(outData);
@@ -681,13 +699,15 @@ var outData={};
                     res.send(outData);
                     return;
                 }
-                database.writeToChangeLog(req.body, function (err) {
+                database.writeToChangeLog(rowData, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
                         return;
                     }
-                    res.send({success: 'ok'});
+
+                    outData.resultItem.CHANGE_MSG='applied';
+                    res.send(outData);
                 })
             })
         })

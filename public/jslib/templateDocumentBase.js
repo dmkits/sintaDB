@@ -1,9 +1,9 @@
 /**
  * Created by dmkits on 16.02.17.
  */
-define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane",
-        "dijit/form/Button","dijit/form/TextBox","dijit/form/DateTextBox","dijit/form/NumberTextBox", "dojo/dom-style"],
-    function(declare, BorderContainer, LayoutContainer, ContentPane, Button, TextBox,DateTextBox,NumberTextBox) {
+define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/TitlePane",
+        "dijit/form/Button","dijit/form/ToggleButton","dijit/form/TextBox","dijit/form/DateTextBox","dijit/form/NumberTextBox", "dojo/dom-style"],
+    function(declare, BorderContainer, LayoutContainer, ContentPane, TitlePane, Button,ToggleButton, TextBox,DateTextBox,NumberTextBox) {
         return declare("TemplateDocumentBase", [BorderContainer], {
             constructor: function(args,parentName){
                 declare.safeMixin(this,args);
@@ -15,9 +15,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
             postCreate: function(){
                 //TODO actions of create document elements on parent
             },
-            setContainer: function(params, style, tagName){
+            setContainer: function(params, tagName){
                 if (!params) params={};
-                if (style) params.style= style;
                 var container;
                 if (!tagName)
                     container= new LayoutContainer(params);
@@ -25,14 +24,19 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                     container= new LayoutContainer(params, tagName);
                 return container;
             },
-            setChildContainer: function(params, style, tagName){
-                var container= this.setContainer(params, style, tagName);
+            /*
+             * params = { style }
+             */
+            setChildContainer: function(params, tagName){
+                var container= this.setContainer(params, tagName);
                 this.addChild(container);
                 return container;
             },
-            setContentPane: function(params, style, tagName){
+            /*
+             * params= { style }
+             */
+            setContentPane: function(params, tagName){
                 if (!params) params={};
-                if (style) params.style= style;
                 var contentPane;
                 if (!tagName)
                     contentPane= new ContentPane(params);
@@ -40,8 +44,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                     contentPane= new ContentPane(params, tagName);
                 return contentPane;
             },
-            setChildContentPaneTo: function(parent, params, style){
-                var contentPane= this.setContentPane(params, style);
+            setChildContentPaneTo: function(parent, params){
+                var contentPane= this.setContentPane(params);
                 parent.addChild(contentPane);
                 return contentPane;
             },
@@ -75,11 +79,12 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                 table.appendChild(tableRow);
                 return tableRow;
             },
-            addHeaderCellToTableRow: function(tableRow, content, style) {
+            addHeaderCellToTableRow: function(tableRow, width, style, content) {
                 var tableCell = document.createElement("th");
                 if (!style) style="";
                 style= "white-space:nowrap;"+style;
                 tableCell.setAttribute("style", style);
+                if (width!=undefined) tableCell.setAttribute("width", width+"px");
                 tableRow.appendChild(tableCell);
                 if (content) tableCell.innerHTML= content;
                 return tableCell;
@@ -109,21 +114,35 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
             },
 
             /*
-             * params= {labelText, cellWidth, cellStyle, btnStyle, btnParameters}
+             * params= {labelText, cellWidth, cellStyle, btnStyle, btnChecked, btnParameters}
              */
-            addTableCellButtonTo: function(tableRowNode, params){
-                var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle);
+            addButtonTo: function(parentNode, params){
                 var btnParameters={};
                 if (params.btnParameters) btnParameters=params.btnParameters;
                 if (params.labelText) btnParameters.label=params.labelText;
-                var button = new Button(btnParameters);
+                if (params.btnChecked!==undefined) {
+                    btnParameters.checked=params.btnChecked;
+                    btnParameters.iconClass='dijitCheckBoxIcon';
+                }
+                var button = (params.btnChecked===undefined) ? new Button(btnParameters) : new ToggleButton(btnParameters);
                 var btnStyle="";
                 if (params.btnStyle) btnStyle=params.btnStyle;
                 var existsStyle=button.domNode.firstChild.getAttribute("style");
                 if (existsStyle) btnStyle=existsStyle+btnStyle;
                 button.domNode.firstChild.setAttribute("style",btnStyle);
-                tableCell.appendChild(button.domNode);
+                parentNode.appendChild(button.domNode);
                 return button;
+            },
+            /*
+             * params= {labelText, cellWidth, cellStyle, btnStyle, btnParameters}
+             */
+            addTableHeaderButtonTo: function(tableRowNode, params){
+                var tableCell = this.addHeaderCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle);
+                return this.addButtonTo(tableCell, params);
+            },
+            addTableCellButtonTo: function(tableRowNode, params){
+                var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle);
+                return this.addButtonTo(tableCell, params);
             },
             createInputTo: function(parent, label, labelStyle){
                 var labelTag;
@@ -178,6 +197,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                 if (params.inputStyle) numberTextBoxParams.style=params.inputStyle;
                 return new NumberTextBox(numberTextBoxParams,inputNumberTextBox);
             },
+            addChildTitlePaneTo: function(parent, params, style){
+                if (!params) params={};
+                if (style) params.style= style;
+                var titlePane= new TitlePane(params);
+                parent.addChild(titlePane);
+                return titlePane;
+            },
             /*
              * params { style, newTable:true/false }
              */
@@ -191,7 +217,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                 return printData;
             },
             /*
-             * params { width, style, contentStyle, label, labelStyle, value, type, valueStyle, printFormat }
+             * fill data item for printTable module
+             * params { width, style, contentStyle, align: "left" / "right" / "center", label, labelStyle, value, type, valueStyle, printFormat }
              */
             addPrintDataSubItemTo: function(printData, sectionName, params){
                 if (!printData[sectionName]) printData[sectionName]=[];
@@ -206,6 +233,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Layo
                 if (params.style!==undefined) printDataItem["style"]= params.style;
                 if (params.width!==undefined) printDataItem["width"]= params.width;
                 if (params.contentStyle!==undefined) printDataItem["contentStyle"]= params.contentStyle;
+                if (params.align!==undefined) printDataItem["align"]= params.align;
                 if (params.label!==undefined) printDataItem["label"]= params.label;
                 if (params.labelStyle!==undefined) printDataItem["labelStyle"]= params.labelStyle;
                 if (params.value!==undefined) printDataItem["value"]= params.value;

@@ -190,7 +190,7 @@ module.exports= {
             .authorizeAsAdmin()
             .assert.visible("@backupDialog")
             .assert.visible("@backupFileName")
-            .assertBackupDialogIsEmpty()                ///////////////
+            .assertBackupDialogIsEmpty()
             .setValue("@backupFileName","sinta")
             .submitDialog('@backupDialog')
             .waitForElementVisible('@backupDBResultField')
@@ -201,7 +201,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
-            .assertRestoreDialogIsEmpty()                                                                   ///
+            .assertRestoreDialogIsEmpty()
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
             .submitDialog('@restoreDialog')
@@ -220,7 +220,7 @@ module.exports= {
         startUpParams.click('@restoreBtn')
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
-            .waitForElementVisible('@restoreDialog')     ////////
+            .waitForElementVisible('@restoreDialog')
             .assertRestoreDialogIsEmpty()
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
@@ -232,7 +232,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
-            .assertRestoreDialogIsEmpty()       ///////////
+            .assertRestoreDialogIsEmpty()
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","sinta")
             .submitDialog('@restoreDialog')
@@ -245,7 +245,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@restoreDialog')
-            .assertRestoreDialogIsEmpty()                                                   ///////
+            .assertRestoreDialogIsEmpty()
             .clearValue("@restoreFileName")
             .setValue("@restoreFileName","fail0000")
             .submitDialog('@restoreDialog')
@@ -257,7 +257,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
-            .assertBackupDialogIsEmpty()                                                                 ///
+            .assertBackupDialogIsEmpty()
             .clearValue("@backupFileName")
             .setValue("@backupFileName","testBackup")
             .submitDialog('@backupDialog')
@@ -269,7 +269,7 @@ module.exports= {
             .assertAdminDialogIsEmpty()
             .authorizeAsAdmin()
             .waitForElementVisible('@backupDialog')
-            .assertBackupDialogIsEmpty()                                                   //////
+            .assertBackupDialogIsEmpty()
             .clearValue("@backupFileName")
             .setValue("@backupFileName","sinta")
             .submitDialog('@backupDialog')
