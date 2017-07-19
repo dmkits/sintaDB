@@ -36,7 +36,56 @@ var databaseCommands={
         return instance
         .moveToElement("@tableCell",15,15);
     },
+    //moveToLastRow:function(table){
+    //    var xpath;
+    //    var instance=this;
+    //    getTableID(table, function(id){
+    //        xpath="//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]";
+    //    });
+    //    this.api.perform(function () {
+    //        instance.api.useXpath()
+    //            .waitForElementPresent(xpath)
+    //            .moveTo(xpath,15,15)
+    //            .waitForElementVisible(xpath)
+    //            .useCss();
+    //    });
+    //    return instance;
+    //       // .moveToElement("@tableCell",15,15);
+    //},
+    moveToLastRow:function(table){
+
+        var instance=this;
+
+    this.api.execute(function () {                                                             console.log("execute");
+      //  window.document.getElementById("ht_f6f2836bfa1b4ce2").scrollBy(0, 10000000);
+        var objDiv = document.getElementById("ht_master handsontable");                       console.log("objDiv=",objDiv);
+        objDiv.scrollTop = objDiv.scrollHeight;
+
+        getTableID(table, function(id){
+            instance.elements.tableCell={
+                selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
+                locateStrategy:'xpath'
+            };
+
+        });
+    });
+        //var instance=this;
+        //getTableID(table, function(id){
+        //    instance.elements.tableCell={
+        //        selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
+        //        locateStrategy:'xpath'
+        //    };
+        //});
+
+        this.api.perform(function () {
+            instance.moveToElement("@tableCell",15,15);
+
+        });
+
+        return instance;
+    },
     clickRefreshBtn:function(table){
+        this.api.pause(3000);
         var instance=this;
         getTableID(table, function(id){
             instance.elements.refreshBtn={

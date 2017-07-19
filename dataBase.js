@@ -276,7 +276,7 @@ module.exports.checkIfChangeLogIDExists= function(id, callback) {
 module.exports.matchChangeLogFields= function(data, callback) {
 var ID=data.changeID;
     var CHANGE_DATETIME=data.changeDatetime;
-    var CHANGE_VAL=data.changeVal;
+    var CHANGE_VAL=data.changeVal.replace(/'/g, "''");
     var CHANGE_OBJ=data.changeObj;
     connection.query("select * FROM change_log where ID = '"+ID+"' AND CHANGE_DATETIME='"+CHANGE_DATETIME+"' AND CHANGE_VAL='"+CHANGE_VAL+"' AND CHANGE_OBJ='"+CHANGE_OBJ+"'",
         function (err, recordset) {
@@ -312,7 +312,7 @@ module.exports.writeToChangeLog= function(data, callback) {
     var ID=data.changeID;
     var CHANGE_DATETIME=data.changeDatetime;
     var CHANGE_OBJ=data.changeObj;
-    var CHANGE_VAL=data.changeVal;
+    var CHANGE_VAL=data.changeVal.replace(/'/g, "''");
 
     connection.query( "INSERT INTO change_log (ID, CHANGE_DATETIME, CHANGE_OBJ, CHANGE_VAL, APPLIED_DATETIME) VALUES ('"+ID+"','"+CHANGE_DATETIME+"','"+CHANGE_OBJ+"','"+CHANGE_VAL+"', NOW() );",
         function (err) {

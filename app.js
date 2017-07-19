@@ -588,64 +588,74 @@ app.get("/sysadmin/database/current_changes", function (req, res) {
             outData.noTable = true;
           //  outData.items=getDBModel();
             var arr=getDBModel();
-            var sortArr=sortArray(arr);
-            outData.items=sortArr;
+           // var sortArr=sortArray(arr);
+            outData.items=sortArray(arr);
             res.send(outData);
         }
-        else if (err) {
+        else if (err) {                                console.log("checkIfChangeLogExists err 595=", err);
             outData.error = err.message;
             res.send(outData);
         }else {                                 console.log("current_changes exists ChangeLog");
-            var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
-            matchLogFilesArray(logFilesArr, outData, 0, function (outData) {
+            //var logFilesArr = JSON.parse(fs.readFileSync('./dbConfig/dbModel.json', 'utf-8'));
+            //matchLogFilesArray(logFilesArr, outData, 0, function (outData) {
+            //    res.send(outData);
+                //var  logsData= getDBModel();
+            var arr=getDBModel();
+            var  logsData= sortArray(arr);
+            matchLogData(logsData, outData, 0, function(outData){
                 res.send(outData);
             });
+            //});
         }
     });
 });
 
-function matchLogFilesArray(logFilesArr,outData,ind,callback){
-    var file = logFilesArr[ind];
-    if (!file) {
-        callback(outData);
-        return;
-    }
-    var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + file + '.json', 'utf-8'));
-    matchLogData(jsonFile, outData, 0, function(data){
-        matchLogFilesArray(logFilesArr,data,ind+1,callback)
-    });
-}
+//function matchLogFilesArray(logFilesArr,outData,ind,callback){
+//    var file = logFilesArr[ind];
+//    if (!file) {
+//        callback(outData);
+//        return;
+//    }
+//    var jsonFile = JSON.parse(fs.readFileSync('./dbConfig/' + file + '.json', 'utf-8'));
+//    matchLogData(jsonFile, outData, 0, function(data){
+//        matchLogFilesArray(logFilesArr,data,ind+1,callback)
+//    });
+//}
 
 function matchLogData(logsData, outData, ind, callback){
     var logData = logsData?logsData[ind]:null;
-    if (!logData) {
+    if (!logData) {                console.log("!logData ");
         callback(outData);
         return;
     }
-    database.checkIfChangeLogIDExists(logData.changeID, function (err, existsBool) {
-        if (err) {
-            outData.error = err.message;
+    database.checkIfChangeLogIDExists(logData.changeID, function (err, existsBool) {            console.log("checkIfChangeLogIDExists logData.changeID=",logData.changeID);
+        if (err) {                                                                              console.log("checkIfChangeLogIDExists err=",err);
+            outData.error = "ERROR FOR ID:"+logData.changeID+" Error msg: "+err.message;
             matchLogData(null, outData, ind+1, callback);
+            return;
         }
         if (!existsBool) {
             logData.type = "new";
             logData.message = "not applied";
             outData.items.push(logData);
             matchLogData(logsData, outData, ind+1,callback);
-
+          //  return;
         } else {
             database.matchChangeLogFields(logData,function(err, identicalBool){
                 if (err) {
-                    outData.error = err.message;
-                    matchLogData(logsData, outData, ind+1, callback);
+                    outData.error = err.message;                                         console.log("matchChangeLogFields err 646=",err);
+                    matchLogData(null, outData, ind+1, callback);
+                    return;
                 }
                 if(!identicalBool){
                     logData.type = "warning";
                     logData.message = "Current update has not identical fields!";
                     outData.items.push(logData);
                     matchLogData(logsData, outData, ind+1,callback);
+                   // return;
                 }else{
                     matchLogData(logsData, outData, ind+1,callback);
+                  //  return;
                 }
             })
         }
@@ -718,7 +728,6 @@ app.post("/sysadmin/database/applyChange", function (req, res) {
                         res.send(outData);
                         return;
                     }
-
                     outData.resultItem.CHANGE_MSG='applied';
                     res.send(outData);
                 })

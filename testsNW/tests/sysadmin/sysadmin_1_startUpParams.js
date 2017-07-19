@@ -18,7 +18,7 @@ function deleteTestBackUpFile() {
 
 module.exports= {
 
-    //'@disabled': true,
+    '@disabled': true,
 
     before: function (browser) {
         fs.createReadStream('./test.cfg').pipe(fs.createWriteStream('./test_temp_copy.cfg'));
