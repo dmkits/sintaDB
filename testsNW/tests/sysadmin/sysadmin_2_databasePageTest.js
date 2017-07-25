@@ -40,12 +40,55 @@ module.exports= {
             .assertTotalRowContainsValue('@currentChangesTable', '66');
 
         browser.useXpath()
-            .pause(2000)
-            .waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]", 50000);
+            .waitForElementVisible('//*[@class="handsontable htColumnHeaders"]/div[1]/div/div/div/table[@class="htCore"]');
+            //.waitForElementVisible('//*[@class="handsontable htColumnHeaders"]/div[1]/div/div/div/table[@class="htCore"]', 500, false, function (result) {
+            //    if (result.value) {
+            //        console.log("result.value=", result.value);
+            //    }
+            //});
 
-        //*[@id="ht_4064e718d66cff63"]/div[1]
+      // database.scrollTable('@currentChangesTable');
+        database.scrollTableToValue('@currentChangesTable','chl__1' ); //'dir_products_collections__5'
 
-        ////*[@id="ht_4064e718d66cff63"]/div[1]/div/div/div/table/tbody/tr[15]/td[1]
+        //.waitForElementPresent("//div[@class='wtHolder']/div[@class='wtHider']/div[@class='wtSpreader']/table[@class='htCore']");
+        //.waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']../div//div[@class='ht_master handsontable innerBorderTop']//table[@class='htCore']");
+
+        //browser.useXpath()
+        //    .pause(2000)
+        //    .waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]", 1000);
+
+
+     /*   browser.execute(function() {
+            var table=document.evaluate('//*[@id="sysadmin_database_Tabledatabasecurrent_changes"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            //var lastRow="//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')];
+            //var circle=0;
+            table.scrollTop=0;
+            //function scrollDiv(circle) { console.log("scrollDiv", circle);
+            //    if(circle==20){
+            //        return browser
+            //            .useXpath()
+            //            .waitForElementVisible("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]");
+            //    }
+                    setTimeout(function () {
+                        table.scrollTop =table.scrollTop+ 2000;
+
+                    }, 500);
+         //   }
+          //  scrollDiv(0);
+        }, [], function(){
+                //browser
+                //    .useXpath()
+                //    .waitForElementVisible("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]", 500, false, function (result) {
+                //        if(result.value){
+                //            console.log("result.value=",result.value);
+                //            return;
+                //        }
+                //        scrollDiv(circle++);
+                //    });
+        });
+
+
+*/
 
 
     /*    browser.pause(2000);

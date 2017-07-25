@@ -36,6 +36,43 @@ var databaseCommands={
         return instance
         .moveToElement("@tableCell",15,15);
     },
+    scrollTable:function(table,scrollTopValue){
+        var instance=this;
+
+        getTableID(table, function(id){
+            instance.api.execute(function(args) {    console.log("execute");
+                var table=document.evaluate('//*[@id="'+args+'"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                console.log("table=",table);
+                setTimeout(function () {
+                    console.log("setTimeout");
+                    table.scrollTop = scrollTopValue;
+                }, 1000);
+            },[id]);
+        });
+        return instance;
+    },
+
+    scrollTableToValue: function (table, value) {
+        var instance = this;
+        var scrollTopValue = 0;
+        var xpath = "//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), '" + value + "')]";
+        instance
+            .api.useXpath();
+        var cont = true;
+      //  while (cont) {
+            instance.waitForElementVisible(xpath, 1000, false, function (result) {
+                if (!result.value) {
+                    scrollTopValue = scrollTopValue + 380;
+                    instance.scrollTable(table, scrollTopValue)
+                }
+                else {
+                    cont = false;
+                }
+            });
+     //   }
+        return instance;
+    },
+
     //moveToLastRow:function(table){
     //    var xpath;
     //    var instance=this;
@@ -52,38 +89,38 @@ var databaseCommands={
     //    return instance;
     //       // .moveToElement("@tableCell",15,15);
     //},
-    moveToLastRow:function(table){
-
-        var instance=this;
-
-    this.api.execute(function () {                                                             console.log("execute");
-      //  window.document.getElementById("ht_f6f2836bfa1b4ce2").scrollBy(0, 10000000);
-        var objDiv = document.getElementById("ht_master handsontable");                       console.log("objDiv=",objDiv);
-        objDiv.scrollTop = objDiv.scrollHeight;
-
-        getTableID(table, function(id){
-            instance.elements.tableCell={
-                selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
-                locateStrategy:'xpath'
-            };
-
-        });
-    });
-        //var instance=this;
-        //getTableID(table, function(id){
-        //    instance.elements.tableCell={
-        //        selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
-        //        locateStrategy:'xpath'
-        //    };
-        //});
-
-        this.api.perform(function () {
-            instance.moveToElement("@tableCell",15,15);
-
-        });
-
-        return instance;
-    },
+    //moveToLastRow:function(table){
+    //
+    //    var instance=this;
+    //
+    //this.api.execute(function () {                                                             console.log("execute");
+    //  //  window.document.getElementById("ht_f6f2836bfa1b4ce2").scrollBy(0, 10000000);
+    //    var objDiv = document.getElementById("ht_master handsontable");                       console.log("objDiv=",objDiv);
+    //    objDiv.scrollTop = objDiv.scrollHeight;
+    //
+    //    getTableID(table, function(id){
+    //        instance.elements.tableCell={
+    //            selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
+    //            locateStrategy:'xpath'
+    //        };
+    //
+    //    });
+    //});
+    //    //var instance=this;
+    //    //getTableID(table, function(id){
+    //    //    instance.elements.tableCell={
+    //    //        selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
+    //    //        locateStrategy:'xpath'
+    //    //    };
+    //    //});
+    //
+    //    this.api.perform(function () {
+    //        instance.moveToElement("@tableCell",15,15);
+    //
+    //    });
+    //
+    //    return instance;
+    //},
     clickRefreshBtn:function(table){
         this.api.pause(3000);
         var instance=this;
