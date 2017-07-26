@@ -36,40 +36,77 @@ var databaseCommands={
         return instance
         .moveToElement("@tableCell",15,15);
     },
-    scrollTable:function(table,scrollTopValue){
-        var instance=this;
 
-        getTableID(table, function(id){
-            instance.api.execute(function(args) {    console.log("execute");
-                var table=document.evaluate('//*[@id="'+args+'"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                console.log("table=",table);
-                setTimeout(function () {
-                    console.log("setTimeout");
-                    table.scrollTop = scrollTopValue;
-                }, 1000);
-            },[id]);
-        });
-        return instance;
-    },
+    //scrollTable:function(table,scrollTopValue /*,callback*/){           console.log("scrollTable");
+    //    var instance=this;
+    //    this.api.perform(function(){
+    //        getTableID(table, function(id){                             console.log("getTableID");
+    //            instance.api.execute(function(id,scrollTopValue) {      console.log("scrollTopValue=",scrollTopValue);
+    //                var table=document.evaluate('//*[@id="'+id+'"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    //                console.log("table=",table);
+    //               // setTimeout(function () {
+    //               //     console.log("setTimeout");
+    //                    table.scrollTop = scrollTopValue;
+    //                   // callback();
+    //              //  }, 1000);
+    //            },[id,scrollTopValue]);
+    //        });
+    //    });
+    //    return instance;
+    //},
 
     scrollTableToValue: function (table, value) {
         var instance = this;
+
         var scrollTopValue = 0;
-        var xpath = "//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), '" + value + "')]";
-        instance
-            .api.useXpath();
-        var cont = true;
-      //  while (cont) {
-            instance.waitForElementVisible(xpath, 1000, false, function (result) {
-                if (!result.value) {
-                    scrollTopValue = scrollTopValue + 380;
-                    instance.scrollTable(table, scrollTopValue)
-                }
-                else {
-                    cont = false;
-                }
+        instance.elements.TargetCell={
+            selector:"//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), '" + value + "')]",
+            locateStrategy:'xpath'
+        };
+
+        function scrollTable(table,scrollTopValue ,callback){           console.log("scrollTable");
+            instance.api.perform(function(){
+                getTableID(table, function(id){ console.log("getTableID");
+                   // instance.api.perform(function() {
+                        instance.api.execute(function (id, scrollTopValue) {
+                            console.log("scrollTopValue=", scrollTopValue);
+                            var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                            console.log("table=", table);
+                          //  setTimeout(function () {
+                                table.scrollTop = scrollTopValue; console.log("table.scrollTop");
+                            return true;
+                           // }, 500);
+                        }, [id, scrollTopValue], function(result){
+                            if(result) callback();
+                        });
+                   // });
+                });
             });
-     //   }
+        }
+
+        function checkIfValueVisible(callback) {
+            instance.api.perform(function () {
+                instance.waitForElementVisible('@TargetCell', 3000, false, function (result) {                              console.log("result=", result);
+                    if (result && result.value == false) {
+                        scrollTopValue = scrollTopValue + 380;
+                        scrollTable(table, scrollTopValue,function(){
+                            callback(false);
+                        });
+                    } else {
+                        callback(true);
+                    }
+                });
+            });
+        }
+
+        function loop() {
+                checkIfValueVisible(function (find) {
+                    if (find == true)return;
+                    return loop();
+                });
+        }
+
+        loop();
         return instance;
     },
 
@@ -121,6 +158,7 @@ var databaseCommands={
     //
     //    return instance;
     //},
+
     clickRefreshBtn:function(table){
         this.api.pause(3000);
         var instance=this;
@@ -159,7 +197,6 @@ var databaseCommands={
             .waitForElementPresent("@totalRowInput")
             .assert.valueContains("@totalRowInput", value);
     },
-
     mouseButtonDown:function(btn){
         var instance=this;
         this.api.mouseButtonDown(btn);
@@ -174,7 +211,7 @@ var databaseCommands={
         var instance=this;
         this.api.mouseButtonClick(btn);
         return instance;
-    },
+    }
 };
 
 module.exports = {
