@@ -65,47 +65,51 @@ var databaseCommands={
         };
 
         function scrollTable(table,scrollTopValue ,callback){           console.log("scrollTable");
-            instance.api.perform(function(){
+          //  instance.api.perform(function(){
                 getTableID(table, function(id){ console.log("getTableID");
                    // instance.api.perform(function() {
-                        instance.api.execute(function (id, scrollTopValue) {
-                            console.log("scrollTopValue=", scrollTopValue);
+                        instance.api.execute(function (id, scrollTopValue) {           console.log("scrollTopValue=", scrollTopValue);
                             var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                            console.log("table=", table);
-                          //  setTimeout(function () {
-                                table.scrollTop = scrollTopValue; console.log("table.scrollTop");
+
+                            setTimeout(function () {
+                                table.scrollTop = scrollTopValue;              console.log("table.scrollTop");
                             return true;
-                           // }, 500);
-                        }, [id, scrollTopValue], function(result){
-                            if(result) callback();
+                            }, 500);
+                        }, [id, scrollTopValue], function(){
+                            //instance.api.windowHandle(function(result){
+                              //  console.log(" windowHandle result = ",result);
+                                 callback();
+                          //  });
+
                         });
                    // });
                 });
-            });
+          //  });
         }
 
         function checkIfValueVisible(callback) {
-            instance.api.perform(function () {
-                instance.waitForElementVisible('@TargetCell', 3000, false, function (result) {                              console.log("result=", result);
-                    if (result && result.value == false) {
-                        scrollTopValue = scrollTopValue + 380;
-                        scrollTable(table, scrollTopValue,function(){
+            //instance.api.perform(function () {
+            //    instance.api.windowHandle(function () {
+                    instance.waitForElementPresent('@TargetCell', 3000, false, function (result) {          console.log("result=", result);
+                        if (result && result.value == false) {
                             callback(false);
-                        });
-                    } else {
-                        callback(true);
-                    }
-                });
-            });
+                        } else {
+                            callback(true);
+                        }
+                    });
+              //  });
+        //    });
         }
 
         function loop() {
-                checkIfValueVisible(function (find) {
-                    if (find == true)return;
-                    return loop();
+            checkIfValueVisible(function (find) {
+                if (find == true)return;
+                scrollTopValue = scrollTopValue + 380;
+                scrollTable(table, scrollTopValue, function () {
+                   return ;//loop();
                 });
+            });
         }
-
         loop();
         return instance;
     },
