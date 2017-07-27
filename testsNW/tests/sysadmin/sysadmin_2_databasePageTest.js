@@ -48,11 +48,13 @@ module.exports= {
             //});
 
       // database.scrollTable('@currentChangesTable');
-        database.scrollTableToValue('@currentChangesTable','dir_units__7' );
-          //  .waitForElementPresent('@TargetCell'); //'dir_products_collections__5'   chl__1  dir_units__7
+        database.scrollTableToValue('@currentChangesTable','dir_products_barcodes__1')
+            .waitForElementPresent('@TargetCell')
+            .assert.visible('@TargetCell',"visible!!!"); //'dir_products_collections__5'   chl__1  dir_units__7
 
-        browser.useXpath()
-            .waitForElementPresent("//td[contains(text(), 'dir_units__7')]");
+        //browser.useXpath()
+        //    .waitForElementPresent("//td[contains(text(), 'dir_units__7')]");
+
         //.waitForElementPresent("//div[@class='wtHolder']/div[@class='wtHider']/div[@class='wtSpreader']/table[@class='htCore']");
         //.waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']../div//div[@class='ht_master handsontable innerBorderTop']//table[@class='htCore']");
 
