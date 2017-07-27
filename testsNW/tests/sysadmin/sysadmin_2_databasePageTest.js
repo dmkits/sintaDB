@@ -6,6 +6,7 @@ module.exports= {
 
     before: function (browser) {
         fs.createReadStream('./test.cfg').pipe(fs.createWriteStream('./test_temp_copy.cfg'));
+        browser.maximizeWindow();
     },
 
     'Sysadmin Header If  All Elements Visible Tests': function (browser) {
@@ -17,11 +18,10 @@ module.exports= {
             .navigate()
             .waitForElementVisible("@img")
             .waitForElementVisible("@btnDatabase")
-        ;
-         /*   .click('@StartUpParamsBtn');
+            .click('@StartUpParamsBtn');
 
         startUpParams.createTempDB();
-*/
+
         mainHeader
             .waitForElementVisible('@btnDatabase')
             .click('@btnDatabase')
@@ -37,82 +37,9 @@ module.exports= {
             .waitForElementVisible('@sysadmin_database_ContentPaneDetailContainer')
             .assertTableTitleHasText('@currentChangesTable', 'Current Changes')
             .waitForElementVisible('@currentChangesTable')
-            .assertTotalRowContainsValue('@currentChangesTable', '66');
+            .assertTotalRowContainsValue('@currentChangesTable', '66')
 
-        browser.useXpath()
-            .waitForElementVisible('//*[@class="handsontable htColumnHeaders"]/div[1]/div/div/div/table[@class="htCore"]');
-            //.waitForElementVisible('//*[@class="handsontable htColumnHeaders"]/div[1]/div/div/div/table[@class="htCore"]', 500, false, function (result) {
-            //    if (result.value) {
-            //        console.log("result.value=", result.value);
-            //    }
-            //});
-
-      // database.scrollTable('@currentChangesTable');
-        database.scrollTableToValue('@currentChangesTable','dir_products_barcodes__1')
-            .waitForElementPresent('@TargetCell')
-            .assert.visible('@TargetCell',"visible!!!"); //'dir_products_collections__5'   chl__1  dir_units__7
-
-        //browser.useXpath()
-        //    .waitForElementPresent("//td[contains(text(), 'dir_units__7')]");
-
-        //.waitForElementPresent("//div[@class='wtHolder']/div[@class='wtHider']/div[@class='wtSpreader']/table[@class='htCore']");
-        //.waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']../div//div[@class='ht_master handsontable innerBorderTop']//table[@class='htCore']");
-
-        //browser.useXpath()
-        //    .pause(2000)
-        //    .waitForElementPresent("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]", 1000);
-
-
-     /*   browser.execute(function() {
-            var table=document.evaluate('//*[@id="sysadmin_database_Tabledatabasecurrent_changes"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-            //var lastRow="//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')];
-            //var circle=0;
-            table.scrollTop=0;
-            //function scrollDiv(circle) { console.log("scrollDiv", circle);
-            //    if(circle==20){
-            //        return browser
-            //            .useXpath()
-            //            .waitForElementVisible("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]");
-            //    }
-                    setTimeout(function () {
-                        table.scrollTop =table.scrollTop+ 2000;
-
-                    }, 500);
-         //   }
-          //  scrollDiv(0);
-        }, [], function(){
-                //browser
-                //    .useXpath()
-                //    .waitForElementVisible("//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]", 500, false, function (result) {
-                //        if(result.value){
-                //            console.log("result.value=",result.value);
-                //            return;
-                //        }
-                //        scrollDiv(circle++);
-                //    });
-        });
-
-
-*/
-
-
-    /*    browser.pause(2000);
-           browser.execute(function () {
-              // console.log("execute");
-               var element = document.evaluate( "//div[@id='sysadmin_database_Tabledatabasecurrent_changes']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody//td[contains(text(), 'dir_products_collections__5')]" ,document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-
-               element.scrollIntoView();
-
-               //  window.document.getElementById("ht_f6f2836bfa1b4ce2").scrollBy(0, 10000000);
-               //var objDiv =
-                   //document.getElementById("HTableSimpleFiltered_0").scrollTop -=10000;
-             //  console.log("objDiv=", objDiv);
-            //   objDiv.scrollTop = objDiv.scrollHeight;
-           },[]);
-           */
-            //.moveToLastRow('@currentChangesTable');
-
-            /*.assertTableTitleHasText('@currentChangesTable', 'Current Changes')
+            .assertTableTitleHasText('@currentChangesTable', 'Current Changes')
             .assertHeaderContainsText('@currentChangesTable', '1', 'changeID')
             .assertHeaderContainsText('@currentChangesTable', '2', 'changeDatetime')
             .assertHeaderContainsText('@currentChangesTable', '3', 'changeObj')
@@ -133,7 +60,12 @@ module.exports= {
             .mouseButtonUp("left")
             .mouseButtonClick('right')
             .waitForElementVisible('@applyChangesDialog')
-            .click('@applyChangesDialog')
+            .click('@applyChangesDialog');
+        browser.pause(6000);
+
+            database.assertCellContainsText('@currentChangesTable', '1', '6', 'applied')
+            .assertCellContainsText('@currentChangesTable', '2', '6', 'applied')
+            .assertCellContainsText('@currentChangesTable', '3', '6', 'applied')
             .clickRefreshBtn("@currentChangesTable")
             .waitForElementVisible("@currentChangesTable");
         browser.pause(2000);
@@ -165,19 +97,18 @@ module.exports= {
             .waitForElementVisible('@currentChangesTable')
             .moveToCell('@currentChangesTable', '1', '1')
             .mouseButtonDown("left")
-           // .moveToCell('@currentChangesTable', '63', '3')
-
             .moveToLastRow('@currentChangesTable')
             .mouseButtonUp("left")
-        */
-          /*  .mouseButtonClick('right')
+            .mouseButtonClick('right')
             .waitForElementVisible('@applyChangesDialog')
             .click('@applyChangesDialog');
-            browser.pause(10000);
-        //database
-        //    .assertCellContainsText('@currentChangesTable', '1', '6', 'applied')
+            browser.pause(60000);
 
-        database .click('@changeLogBtn')
+        database
+            .scrollTableToTop('@currentChangesTable')
+            .assertCellContainsText('@currentChangesTable', '1', '6', 'applied');
+
+            database.click('@changeLogBtn')
             .clickRefreshBtn("@changeLogTable");
         browser.pause(2000);
 
@@ -185,12 +116,13 @@ module.exports= {
 
         sysadminHeader
             .click('@StartUpParamsBtn');
-    },
+    }
+    ,
         'Delete Test DB and reconnect': function(browser) {
             var startUpParams = browser.page.startUpParams();
             startUpParams.dropTempDBAndReconnect();
                 browser.end();
-            */
+
         }
 };
 

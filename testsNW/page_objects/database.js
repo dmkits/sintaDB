@@ -38,25 +38,7 @@ var databaseCommands = {
             .moveToElement("@tableCell", 15, 15);
     },
 
-    //scrollTable:function(table,scrollTopValue /*,callback*/){           console.log("scrollTable");
-    //    var instance=this;
-    //    this.api.perform(function(){
-    //        getTableID(table, function(id){                             console.log("getTableID");
-    //            instance.api.execute(function(id,scrollTopValue) {      console.log("scrollTopValue=",scrollTopValue);
-    //                var table=document.evaluate('//*[@id="'+id+'"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    //                console.log("table=",table);
-    //               // setTimeout(function () {
-    //               //     console.log("setTimeout");
-    //                    table.scrollTop = scrollTopValue;
-    //                   // callback();
-    //              //  }, 1000);
-    //            },[id,scrollTopValue]);
-    //        });
-    //    });
-    //    return instance;
-    //},
-
-    scrollTableToValue: function (table, value) {
+    scrollTableToValue: function (table, value) {   /// bug
 
         var instance = this;
         var scrollTopValue = 0;
@@ -70,28 +52,38 @@ var databaseCommands = {
         });
 
         function scrollTable(table, scrollTopValue, callback) {
-            getTableID(table, function (id) {
-                instance.api.execute(function (id, scrollTopValue) {
-                    var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                    //table.scrollTop = 0;
-                    table.scrollTop = scrollTopValue;
-                }, [id, scrollTopValue], function () {
-                    instance.api.saveScreenshot('./screenshots/fileName' + scrollTopValue + '.png');
+            instance.api.pause(2000,function(){
+                getTableID(table, function (id) {
+                    instance.api.execute(function (id, scrollTopValue) {
+                        var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                        //table.scrollTop = 0;
+                        table.scrollTop = scrollTopValue;
+                    }, [id, scrollTopValue], function () {
+                        instance.api.saveScreenshot('./screenshots/fileName' + scrollTopValue + '.png');
 
-                    instance.elements.LastVisibleRow = {
-                        selector: '//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]//table[@class=\'htCore\']//tbody/tr[last()]/td',
-                        locateStrategy: 'xpath'
-                    };
+                        //instance.api.pause(2000);
+                        instance.elements.LastVisibleRow = {
+                            selector: '//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]//table[@class=\'htCore\']//tbody/tr[last()]/td[1]',
+                            locateStrategy: 'xpath'
+                        };
 
-                    instance.getText('@LastVisibleRow', function (result) {
-                        var text = result.value;
-                        if (text==LastVisibleRowValue){
-                            callback(false); //scrolled
-                            return;
-                        }
+                        instance.getText('@LastVisibleRow', function (result) {
+                            //var text = result.value;     console.log("text=",text);console.log("LastVisibleRowValue=",LastVisibleRowValue);
+                            //if (text==LastVisibleRowValue){
+                            //    callback(false); //scrolled
+                            //    return;
+                            //}
+                            //LastVisibleRowValue=text;
+                          //  callback(true);
 
-                        LastVisibleRowValue=text;
-                        callback(true);
+                            console.log("result.value=",result.value);
+
+                            if (result.value=="dir_products_collections__5"){  ////////// заглушка
+                                callback(false); //scrolled
+                                return;
+                            }
+                              callback(true);
+                        });
                     });
                 });
             });
@@ -115,7 +107,7 @@ var databaseCommands = {
                 scrollTopValue = scrollTopValue + 380;
                 scrollTable(table, scrollTopValue, function (scrolled) {
                     if(scrolled==true)return loop();
-                    instance.waitForElementVisible('@TargetCell',1000,"FAIL! Value not found in table  %s ");
+                    instance.waitForElementVisible('@TargetCell',1000,"FAIL! Value not found in the table  %s ");
                 });
             });
         }
@@ -124,51 +116,42 @@ var databaseCommands = {
         return instance;
     },
 
-    //moveToLastRow:function(table){
-    //    var xpath;
-    //    var instance=this;
-    //    getTableID(table, function(id){
-    //        xpath="//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]";
-    //    });
-    //    this.api.perform(function () {
-    //        instance.api.useXpath()
-    //            .waitForElementPresent(xpath)
-    //            .moveTo(xpath,15,15)
-    //            .waitForElementVisible(xpath)
-    //            .useCss();
-    //    });
-    //    return instance;
-    //       // .moveToElement("@tableCell",15,15);
-    //},
-    //moveToLastRow:function(table){
-    //
-    //    var instance=this;
-    //
-    //this.api.execute(function () {                                                             console.log("execute");
-    //  //  window.document.getElementById("ht_f6f2836bfa1b4ce2").scrollBy(0, 10000000);
-    //    var objDiv = document.getElementById("ht_master handsontable");                       console.log("objDiv=",objDiv);
-    //    objDiv.scrollTop = objDiv.scrollHeight;
-    //
-    //    getTableID(table, function(id){
-    //        instance.elements.tableCell={
-    //            selector:"//div[@id='"+id+"']//div[@class='ht_master handsontable']//table[@class='htCore']//tbody/tr[last()]/td[1]",
-    //            locateStrategy:'xpath'
-    //        };
-    //
-    //    });
-    //});
-    //    //var instance=this;
-    //    //getTableID(table, function(id){
-    //    dir_products_barcodes__1
-    //    //});
-    //
-    //    this.api.perform(function () {
-    //        instance.moveToElement("@tableCell",15,15);
-    //
-    //    });
-    //
-    //    return instance;
-    //},
+    moveToLastRow:function(table){
+        var instance = this;
+                getTableID(table, function (id) {
+                    instance.api.execute(function (id) {
+                        var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                        table.scrollTop = 1000000;
+                    }, [id], function () {
+                        instance.elements.LastRowInTable = {
+                            selector: '//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]//table[@class=\'htCore\']//tbody/tr[last()]/td[1]',
+                            locateStrategy: 'xpath'
+                        };
+                        instance
+                            .moveToElement('@LastRowInTable', 10, 10);
+                    });
+                });
+
+        return instance;
+    },
+    scrollTableToTop:function(table){
+        var instance = this;
+        getTableID(table, function (id) {
+            instance.api.execute(function (id) {
+                var table = document.evaluate('//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                table.scrollTop = 0;
+            }, [id], function () {
+                //instance.elements.LastRowInTable = {
+                //    selector: '//*[@id="' + id + '"]//*[@class="handsontable htColumnHeaders"]/div[1]/div[@class="wtHolder"]//table[@class=\'htCore\']//tbody/tr[1]/td[1]',
+                //    locateStrategy: 'xpath'
+                //};
+                //instance
+                //    .moveToElement('@LastRowInTable', 10, 10);
+            });
+        });
+
+        return instance;
+    },
 
     clickRefreshBtn: function (table) {
         this.api.pause(3000);

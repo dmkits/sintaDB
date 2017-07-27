@@ -25,6 +25,10 @@ var startUpParamsCommands = {
     },
 
     dropTempDBAndReconnect: function () {
+        this.api.perform(function(){
+            console.log("dropTempDBAndReconnect");
+        });
+
         var instance=this;
         var dbConfig;
         this.api.pause(2000);
